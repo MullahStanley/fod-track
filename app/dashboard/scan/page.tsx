@@ -28,11 +28,9 @@ export default function ScanPage() {
       router.push("/dashboard/review");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Scan failed";
-      setError(
-        msg.includes("no_api_key")
-          ? "Vision AI is not configured on this server yet. Use barcode or manual search — both work fully offline."
-          : msg
-      );
+      setError(msg.includes("unavailable") || msg.includes("not configured")
+        ? `${msg} Meanwhile, barcode and manual search work fully offline.`
+        : msg);
     } finally {
       setBusy(false);
     }
@@ -88,11 +86,13 @@ export default function ScanPage() {
       <section className="card mt-4 text-xs text-muted">
         <p className="mb-1 font-medium text-ink">How it works</p>
         <p>
-          Your photo is compressed on-device (≤1024px) and analyzed server-side.
-          The AI identifies components and estimates gram weights — it never
-          guesses calories. Each ingredient is matched against the Kenyan local
-          database first, then global sources, and macros are computed
-          deterministically. You review everything before it's logged.
+          Your photo is compressed on-device (≤1024px) and analyzed server-side
+          — by a local vision model when Ollama is configured (photos never
+          leave the server), otherwise via cloud fallback. The AI identifies
+          components and estimates gram weights — it never guesses calories.
+          Each ingredient is matched against the Kenyan local database first,
+          then global sources, and macros are computed deterministically. You
+          review everything before it's logged.
         </p>
       </section>
     </main>

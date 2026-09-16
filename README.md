@@ -14,7 +14,7 @@ Fast, minimal AI nutrition tracker built for Kenya 🇰🇪 — dual-mode loggin
 | Language | TypeScript (strict) | Deterministic math needs types |
 | Styling | Tailwind CSS | Fast mobile-first UI |
 | DB | SQLite via better-sqlite3 (WAL) | Zero-config persistent storage; swap to Postgres later |
-| Vision | Gemini 2.5 Flash (Google AI Studio) | Free-tier multimodal; strict JSON decomposition |
+| Vision | **Ollama (local: qwen2.5vl / llama3.2-vision)** or Gemini 2.5 Flash | Free & local-first; cloud free-tier fallback; strict JSON decomposition |
 | Food data | USDA FoodData Central + Open Food Facts + offline seed DB | Primary / barcode / resilience |
 | Validation | zod | Hard boundaries at every API edge |
 
@@ -41,12 +41,12 @@ lib/
   validators.ts         zod schemas for all API bodies
 ```
 
-**Security:** `GEMINI_API_KEY` and `USDA_FDC_API_KEY` are read only in server code (`lib/vision.ts`, `lib/provider-usda.ts`) and never shipped to the client.
+**Security:** `GEMINI_API_KEY`, `USDA_FDC_API_KEY`, and `OLLAMA_BASE_URL` are read only in server code (`lib/vision*.ts`, `lib/provider-usda.ts`) and never shipped to the client.
 
 ## The Vision Pipeline (no raw calorie guessing)
 
 1. Client compresses photo → JPEG ≤1024px (`lib/client-utils.ts`).
-2. `lib/vision.ts` sends it to Gemini with a strict schema: components + `estimated_grams` + `confidence` + `suspected_hidden_fats` + `cooking_fats_or_extras`. The prompt explicitly forbids outputting calories/macros.
+2. `lib/vision-ollama.ts` (Ollama, local) or `lib/vision.ts` (Gemini, cloud fallback) sends it with a strict schema: components + `estimated_grams` + `confidence` + `suspected_hidden_fats` + `cooking_fats_or_extras`. The prompt explicitly forbids outputting calories/macros.
 3. `lib/resolve.ts` matches each component **Kenyan DB → seed DB → USDA → OFF** (best term-coverage wins; ties favor the Kenyan DB) and computes macros **deterministically** per 100g × grams.
 4. Everything lands on `/review` as an editable breakdown — steppers, single-tap delete, database search to add missed items, one-tap hidden-fat extras (1 tbsp oil = 14g, etc.).
 5. Only after user review does `POST /api/logs` persist the meal.
@@ -102,11 +102,29 @@ Item macros are recomputed as `per100g × grams/100` everywhere — single sourc
 
 ```bash
 npm install
-cp .env.example .env.local   # add GEMINI_API_KEY and/or USDA_FDC_API_KEY (both optional)
+cp .env.example .env.local
 npm run dev                  # http://localhost:3000
 npm run typecheck && npm run build
-npm test                     # vitest — 42 unit tests
+npm test                     # vitest — 58 unit tests
 ```
+
+### AI meal scanning (choose one)
+
+**Option A — Ollama (recommended: free, local, private, works offline):**
+
+```bash
+# 1. Install Ollama: https://ollama.com
+ollama pull qwen2.5vl:7b        # vision model (~6GB; llama3.2-vision:11b also works)
+
+# 2. In .env.local:
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+```
+
+Photos never leave your machine. If Ollama is unreachable or the model isn't pulled, the API returns an actionable setup message (or silently falls back to Gemini when a key is also configured).
+
+**Option B — Gemini (cloud free tier):** set `GEMINI_API_KEY` from https://aistudio.google.com/apikey
+
+No vision provider configured? Scan explains itself and links to barcode/manual search — both fully offline-capable.
 
 The SQLite file lands in `data/fodtrack.db` (gitignored). First load auto-creates the demo profile.
 

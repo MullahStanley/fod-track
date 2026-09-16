@@ -5,6 +5,9 @@
  * the base64 image to Gemini with a STRICT JSON schema forcing decomposition
  * into weighed components (no raw calorie guessing) → deterministic macros
  * are computed downstream against the food database.
+ *
+ * The strict-JSON extraction and schema coercion helpers are shared with the
+ * Ollama provider (lib/vision-ollama.ts).
  */
 import type { VisionMealAnalysis } from "./types";
 
@@ -32,6 +35,8 @@ Rules:
 - cooking_fats_or_extras: list likely INVISIBLE additions (cooking oil, butter, sugar in sauces, dressings) with estimated grams and a short reason. Empty array if none plausible.
 - If the photo is not food or is unanalyzable, return items: [] and meal_name: "Unidentified".`;
 
+export { SYSTEM_PROMPT as VISION_SYSTEM_PROMPT };
+
 interface GeminiPart {
   text?: string;
   inlineData?: { mimeType: string; data: string };
@@ -49,7 +54,7 @@ export function hasVisionKey(): boolean {
   return Boolean(process.env.GEMINI_API_KEY);
 }
 
-function extractJson(text: string): unknown {
+export function extractJson(text: string): unknown {
   // Strip markdown code fences if the model adds them despite instructions.
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
   const raw = fenced ? fenced[1] : text;
@@ -66,7 +71,7 @@ function clamp(n: unknown, min: number, max: number, fallback: number): number {
   return Math.min(max, Math.max(min, v));
 }
 
-function coerceAnalysis(data: unknown): VisionMealAnalysis {
+export function coerceAnalysis(data: unknown): VisionMealAnalysis {
   const d = (data ?? {}) as Record<string, unknown>;
   const items = Array.isArray(d.items) ? d.items : [];
   const extras = Array.isArray(d.cooking_fats_or_extras)
