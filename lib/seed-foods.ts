@@ -64,18 +64,22 @@ const SEED: SeedFood[] = [
   { name: "Hummus", per100g: { kcal: 166, protein: 8, carbs: 14, fat: 10 }, servingGrams: 30 },
 ];
 
-/** Case-insensitive substring/keyword search over the seed table. */
+/**
+ * Word-boundary search: query terms must match whole words in the food name
+ * (exact word > word prefix). Prevents mid-word substring false positives,
+ * e.g. "fat" matching "nonfat".
+ */
 export function searchSeedFoods(query: string, limit = 12): FoodSearchResult[] {
   const q = query.trim().toLowerCase();
   if (!q) return [];
-  const terms = q.split(/\s+/);
+  const terms = q.split(/\s+/).filter(Boolean);
 
   const scored = SEED.map((food) => {
-    const name = food.name.toLowerCase();
+    const words = food.name.toLowerCase().split(/[^a-z]+/).filter(Boolean);
     let score = 0;
     for (const t of terms) {
-      if (name.includes(t)) score += name.startsWith(t) ? 3 : 2;
-      else if (name.split(/[,\s]/).some((w) => w.startsWith(t))) score += 1;
+      if (words.some((w) => w === t)) score += 3; // exact word match
+      else if (words.some((w) => w.startsWith(t))) score += 2; // word-prefix match
     }
     return { food, score };
   })

@@ -43,11 +43,12 @@ function computeTotals(items: FoodItem[]): {
   let carbs = 0;
   let fat = 0;
   for (const it of items) {
+    // Round per item so stored totals equal what the client displayed on save.
     const f = it.grams / 100;
-    kcal += it.per100g.kcal * f;
-    protein += it.per100g.protein * f;
-    carbs += it.per100g.carbs * f;
-    fat += it.per100g.fat * f;
+    kcal += Math.round(it.per100g.kcal * f);
+    protein += Math.round(it.per100g.protein * f);
+    carbs += Math.round(it.per100g.carbs * f);
+    fat += Math.round(it.per100g.fat * f);
   }
   return {
     kcal: Math.round(kcal),

@@ -99,9 +99,16 @@ npm install
 cp .env.example .env.local   # add GEMINI_API_KEY and/or USDA_FDC_API_KEY (both optional)
 npm run dev                  # http://localhost:3000
 npm run typecheck && npm run build
+npm test                     # vitest — 42 unit tests
 ```
 
 The SQLite file lands in `data/fodtrack.db` (gitignored). First load auto-creates the demo profile.
+
+### Tests
+
+`tests/metabolic.test.ts` — unit conversions (kg/lb, cm/ft-in round trips), Mifflin-St Jeor BMR for both sexes, TDEE across all five activity multipliers, goal adjustments & overrides, every macro preset, protein-first g/kg custom mode, the 1000 kcal floor, and determinism.
+
+`tests/macros.test.ts` — barcode per-serving→per-100g normalization and serving multipliers, search-result item conversion, seed-database word-boundary search, vision resolution (known items, unresolved 0-macro placeholders, pure-fat fallback for unresolvable hidden extras), and client/server total parity (per-item rounding).
 
 ## Roadmap
 

@@ -112,7 +112,7 @@ export function computeMacroTargets(profile: UserProfile): MacroTargets {
   };
 }
 
-/** Sum macros for a set of food items at their current gram weights. */
+/** Sum macros for a set of food items, rounding per item to match the client display. */
 export function sumItemTotals(
   items: Array<{ grams: number; per100g: { kcal: number; protein: number; carbs: number; fat: number } }>
 ): { kcal: number; protein: number; carbs: number; fat: number } {
@@ -122,10 +122,10 @@ export function sumItemTotals(
   let fat = 0;
   for (const item of items) {
     const f = item.grams / 100;
-    kcal += item.per100g.kcal * f;
-    protein += item.per100g.protein * f;
-    carbs += item.per100g.carbs * f;
-    fat += item.per100g.fat * f;
+    kcal += safeRound(item.per100g.kcal * f);
+    protein += safeRound(item.per100g.protein * f);
+    carbs += safeRound(item.per100g.carbs * f);
+    fat += safeRound(item.per100g.fat * f);
   }
   return {
     kcal: Math.round(kcal),
