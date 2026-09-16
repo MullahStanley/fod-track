@@ -1,23 +1,56 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { ThemeScript } from "@/components/theme";
 
 export const metadata: Metadata = {
-  title: "fod-track — AI Nutrition Tracker",
+  metadataBase: new URL("https://fod-track.app"),
+  title: {
+    default: "fod-track — AI Calorie & Nutrition Tracking for Kenya",
+    template: "%s · fod-track",
+  },
   description:
-    "Fast, mobile-first nutrition tracking with AI meal scanning and barcode lookup.",
+    "Track calories and macros with AI meal scanning, barcode lookup, and a built-in database of Kenyan and East African foods. Free, fast, and mobile-first.",
+  keywords: [
+    "calorie tracker Kenya",
+    "Kenyan food nutrition",
+    "calorie counting app Africa",
+    "macro tracker",
+    "AI meal scanner",
+    "ugali calories",
+    "nutrition tracker",
+  ],
+  openGraph: {
+    title: "fod-track — AI Calorie & Nutrition Tracking for Kenya",
+    description:
+      "AI meal scanning, barcode lookup, and Kenyan local foods. Know what your plate costs you before you eat it.",
+    type: "website",
+    siteName: "fod-track",
+  },
+  twitter: {
+    card: "summary",
+    title: "fod-track — AI Calorie & Nutrition Tracking for Kenya",
+    description:
+      "AI meal scanning, barcode lookup, and Kenyan local foods. Know what your plate costs you before you eat it.",
+  },
+  robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  themeColor: "#0b1220",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b1220" },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-dvh">{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
+      <body className="min-h-dvh antialiased">{children}</body>
     </html>
   );
 }

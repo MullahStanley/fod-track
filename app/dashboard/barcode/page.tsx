@@ -3,12 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  apiJson,
-  itemMacros,
-  todayLocalISO,
-  type BarcodeProduct,
-} from "@/lib/client-utils";
+import { apiJson, itemMacros, type BarcodeProduct, type FoodItem } from "@/lib/client-utils";
 import { SectionTitle, Spinner } from "@/components/ui";
 
 const MULTIPLIERS = [0.5, 1, 1.5, 2, 2.5, 3];
@@ -34,7 +29,7 @@ export default function BarcodePage() {
       const msg = e instanceof Error ? e.message : "Lookup failed";
       setError(
         msg.includes("not_found")
-          ? "Product not found in Open Food Facts. Try manual search."
+          ? "Not found in Open Food Facts. Try manual search."
           : msg.includes("network_error")
             ? "Network error reaching Open Food Facts. Try manual search."
             : msg
@@ -48,15 +43,11 @@ export default function BarcodePage() {
     if (!product) return;
     setBusy(true);
     try {
-      const d = await apiJson<{ item: import("@/lib/client-utils").FoodItem }>(
-        "/api/foods/barcode",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code: product.barcode, multiplier }),
-        }
-      );
-      // Hand off to review so the user keeps calibration powers.
+      const d = await apiJson<{ item: FoodItem }>("/api/foods/barcode", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: product.barcode, multiplier }),
+      });
       sessionStorage.setItem(
         "fodtrack_scan",
         JSON.stringify({
@@ -66,7 +57,7 @@ export default function BarcodePage() {
           unresolvedNames: [],
         })
       );
-      router.push("/review");
+      router.push("/dashboard/review");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Save failed");
     } finally {
@@ -84,11 +75,11 @@ export default function BarcodePage() {
     : null;
 
   return (
-    <main className="mx-auto w-full max-w-md px-4 pb-40 pt-6">
-      <header className="mb-4 flex items-center justify-between">
-        <Link href="/" className="chip">← Back</Link>
-        <h1 className="text-lg font-bold">Barcode Lookup</h1>
-        <span className="w-14" />
+    <main className="mx-auto w-full max-w-2xl px-4 pb-24 pt-6 sm:px-6">
+      <header className="mb-6 flex items-center justify-between">
+        <Link href="/dashboard" className="chip">← Dashboard</Link>
+        <h1 className="text-sm font-bold tracking-widest">BARCODE</h1>
+        <span className="w-24" />
       </header>
 
       <section className="card mb-4">
@@ -107,17 +98,12 @@ export default function BarcodePage() {
             {busy ? <Spinner /> : "Look up"}
           </button>
         </div>
-        <p className="mt-2 text-xs text-muted">
-          Camera scanning: the browser Barcode Detection API is used automatically
-          where available; otherwise type the number below the barcode.
-        </p>
         <CameraScan onDetected={(c) => { setCode(c); void lookup(); }} />
       </section>
 
       {error && (
-        <div className="mb-4 rounded-xl border border-bad/40 bg-bad/10 p-3 text-xs text-bad">
-          {error}{" "}
-          <Link href="/search" className="underline">Search manually →</Link>
+        <div className="mb-4 rounded-lg border border-bad/40 bg-bad/10 p-3 text-xs text-bad">
+          {error} <Link href="/dashboard/search" className="underline">Search manually →</Link>
         </div>
       )}
 
@@ -129,21 +115,21 @@ export default function BarcodePage() {
           <p className="text-base font-semibold">{product.name}</p>
 
           <div className="mt-3">
-            <span className="label">Servings (×{multiplier} = {Math.round(product.serving.grams * multiplier)}g)</span>
+            <span className="label">
+              Servings — {multiplier}× = {Math.round(product.serving.grams * multiplier)}g
+            </span>
             <div className="flex flex-wrap gap-2">
               {MULTIPLIERS.map((m) => (
-                <button
-                  key={m}
-                  className={`chip ${multiplier === m ? "!border-accent !text-accent" : ""}`}
-                  onClick={() => setMultiplier(m)}
-                >
+                <button key={m}
+                  className={`chip ${multiplier === m ? "!border-ink !font-medium" : ""}`}
+                  onClick={() => setMultiplier(m)}>
                   {m}×
                 </button>
               ))}
             </div>
           </div>
 
-          <dl className="mt-4 grid grid-cols-2 gap-2 text-sm">
+          <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
             <div className="flex justify-between"><dt className="text-muted">Calories</dt><dd className="font-bold">{scaled.kcal} kcal</dd></div>
             <div className="flex justify-between"><dt className="text-muted">Protein</dt><dd>{scaled.protein} g</dd></div>
             <div className="flex justify-between"><dt className="text-muted">Carbs</dt><dd>{scaled.carbs} g</dd></div>
@@ -151,7 +137,7 @@ export default function BarcodePage() {
           </dl>
 
           <button className="btn-primary mt-4 w-full" onClick={save} disabled={busy}>
-            {busy ? "Preparing…" : "Continue to review →"}
+            {busy ? "Preparing…" : "Review & save →"}
           </button>
         </section>
       )}
@@ -159,10 +145,7 @@ export default function BarcodePage() {
   );
 }
 
-/**
- * Uses the native Barcode Detection API when available ("shape detection" in
- * Chromium). Gracefully hides itself elsewhere.
- */
+/** Native Barcode Detection API where available; hides itself otherwise. */
 function CameraScan({ onDetected }: { onDetected: (code: string) => void }) {
   const [supported, setSupported] = useState<boolean | null>(null);
   const [scanning, setScanning] = useState(false);
@@ -170,6 +153,7 @@ function CameraScan({ onDetected }: { onDetected: (code: string) => void }) {
 
   async function start() {
     setScanning(true);
+    setCameraError(null);
     try {
       const video = document.createElement("video");
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -179,7 +163,9 @@ function CameraScan({ onDetected }: { onDetected: (code: string) => void }) {
       await video.play();
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const detector = new (window as any).BarcodeDetector({ formats: ["ean_13", "ean_8", "upc_a", "upc_e"] });
+      const detector = new (window as any).BarcodeDetector({
+        formats: ["ean_13", "ean_8", "upc_a", "upc_e"],
+      });
       const deadline = Date.now() + 15000;
       let found: string | null = null;
 
@@ -194,7 +180,7 @@ function CameraScan({ onDetected }: { onDetected: (code: string) => void }) {
 
       stream.getTracks().forEach((t) => t.stop());
       if (found) onDetected(found);
-      else setCameraError((e) => e ?? "No barcode detected — try again or type it.");
+      else setCameraError("No barcode detected — try again or type the code.");
     } catch {
       setSupported(false);
       setCameraError("Camera scanning unavailable — type the code instead.");

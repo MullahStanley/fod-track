@@ -121,7 +121,7 @@ export interface FoodSearchResult {
   brand?: string;
   per100g: { kcal: number; protein: number; carbs: number; fat: number };
   servingGrams: number | null;
-  source: "usda" | "seed" | "openfoodfacts";
+  source: "usda" | "seed" | "openfoodfacts" | "local";
 }
 
 export interface ResolvedScan {

@@ -2,7 +2,9 @@
  * Open Food Facts provider — keyless barcode product lookup.
  * Docs: https://openfoodfacts.github.io/openfoodfacts-server/api/
  */
-import type { BarcodeProduct } from "./types";
+import type { BarcodeProduct, FoodSearchResult } from "./types";
+
+const OFF_UA = "fod-track/0.1 (nutrition tracker)";
 
 function baseUrl(): string {
   return process.env.OFF_BASE_URL || "https://world.openfoodfacts.org";
@@ -75,7 +77,7 @@ export async function lookupBarcode(barcode: string): Promise<BarcodeLookupResul
   let res: Response;
   try {
     res = await fetch(url, {
-      headers: { "User-Agent": "fod-track/0.1 (nutrition tracker)" },
+      headers: { "User-Agent": OFF_UA },
       signal: AbortSignal.timeout(8000),
     });
   } catch {
@@ -160,4 +162,57 @@ export async function lookupBarcode(barcode: string): Promise<BarcodeLookupResul
 
 function round1(n: number): number {
   return Math.round(n * 10) / 10;
+}
+
+interface OffSearchResponse {
+  products?: OffProduct[];
+}
+
+/**
+ * Keyless text search over Open Food Facts — an extra crowdsourced source,
+ * strongest for packaged/branded goods. Best-effort: returns [] on any failure.
+ */
+export async function searchOpenFoodFacts(query: string, limit = 8): Promise<FoodSearchResult[]> {
+  const q = query.trim();
+  if (!q) return [];
+
+  const url =
+    `${baseUrl()}/cgi/search.pl?search_terms=${encodeURIComponent(q)}` +
+    `&search_simple=1&action=process&json=1&page_size=${limit}` +
+    `&fields=product_name,product_name_en,brands,serving_quantity,nutriments`;
+
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": OFF_UA },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return [];
+    const data = (await res.json()) as OffSearchResponse;
+
+    const out: FoodSearchResult[] = [];
+    for (const p of data.products ?? []) {
+      const name = p.product_name_en || p.product_name;
+      if (!name) continue;
+      const n = p.nutriments ?? {};
+      const kcal =
+        num(n["energy-kcal_100g"]) ??
+        (n.energy_100g != null ? kJtoKcal(num(n.energy_100g)!) : null);
+      if (kcal == null) continue;
+      out.push({
+        name: name.trim(),
+        brand: p.brands?.split(",")[0]?.trim() || undefined,
+        per100g: {
+          kcal: round1(kcal),
+          protein: round1(num(n.proteins_100g) ?? 0),
+          carbs: round1(num(n.carbohydrates_100g) ?? 0),
+          fat: round1(num(n.fat_100g) ?? 0),
+        },
+        servingGrams: num(p.serving_quantity),
+        source: "openfoodfacts",
+      });
+    }
+    return out.slice(0, limit);
+  } catch {
+    return [];
+  }
 }

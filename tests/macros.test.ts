@@ -9,6 +9,11 @@ import {
   findSeedFoodByName,
   getSeedFoodCount,
 } from "../lib/seed-foods";
+import {
+  searchKenyaFoods,
+  findKenyaFoodByName,
+  getKenyaFoodCount,
+} from "../lib/foods-kenya";
 import { itemMacros, itemsTotals } from "../lib/client-utils";
 import type {
   BarcodeProduct,
@@ -70,6 +75,45 @@ describe("searchResultToFoodItem", () => {
   it("honors an explicit gram override", () => {
     const item = searchResultToFoodItem(CHICKEN_RESULT, 220);
     expect(item.grams).toBe(220);
+  });
+});
+
+describe("kenyan local food database", () => {
+  it("contains a meaningful local foods table", () => {
+    expect(getKenyaFoodCount()).toBeGreaterThanOrEqual(50);
+  });
+
+  it("finds staples by Swahili and sheng names", () => {
+    const results = searchKenyaFoods("sima");
+    expect(results.length).toBeGreaterThan(0);
+    expect(results[0].name.toLowerCase()).toContain("ugali");
+    expect(results[0].brand).toBe("Local (Kenya)");
+  });
+
+  it("resolves sukuma wiki preparations", () => {
+    const results = searchKenyaFoods("sukuma");
+    expect(results.length).toBeGreaterThanOrEqual(3); // sauteed, steamed, fried
+  });
+
+  it("scores exact word matches above prefixes", () => {
+    const results = searchKenyaFoods("ugali");
+    expect(results[0].name.toLowerCase()).toContain("ugali");
+  });
+
+  it("finds nyama choma by alternate name", () => {
+    const results = searchKenyaFoods("choma");
+    expect(results.length).toBeGreaterThan(0);
+    expect(results[0].name).toMatch(/Nyama Choma/i);
+  });
+
+  it("resolves vision-style names to local foods", () => {
+    const match = findKenyaFoodByName("ugali with sukuma");
+    expect(match).not.toBeNull();
+    expect(match!.per100g.kcal).toBeGreaterThan(0);
+  });
+
+  it("returns empty for gibberish", () => {
+    expect(searchKenyaFoods("zzzqqqxyzzy")).toEqual([]);
   });
 });
 

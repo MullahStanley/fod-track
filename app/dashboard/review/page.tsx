@@ -16,20 +16,20 @@ import {
 import { GramStepper, SectionTitle, Spinner } from "@/components/ui";
 
 const HIDDEN_EXTRA_PRESETS = [
-  { name: "Olive oil (1 tbsp)", per100g: { kcal: 884, protein: 0, carbs: 0, fat: 100 }, grams: 14 },
+  { name: "Cooking oil (1 tbsp)", per100g: { kcal: 884, protein: 0, carbs: 0, fat: 100 }, grams: 14 },
   { name: "Butter (1 tbsp)", per100g: { kcal: 717, protein: 0.9, carbs: 0.1, fat: 81 }, grams: 14 },
+  { name: "Sugar (1 tsp)", per100g: { kcal: 387, protein: 0, carbs: 100, fat: 0 }, grams: 4 },
+  { name: "Chai with sugar (cup)", per100g: { kcal: 45, protein: 1.6, carbs: 6.5, fat: 1.6 }, grams: 200 },
   { name: "Mayonnaise (1 tbsp)", per100g: { kcal: 680, protein: 1, carbs: 0.6, fat: 75 }, grams: 14 },
   { name: "Ranch dressing", per100g: { kcal: 430, protein: 1, carbs: 6, fat: 45 }, grams: 30 },
-  { name: "Sugar (1 tsp)", per100g: { kcal: 387, protein: 0, carbs: 100, fat: 0 }, grams: 4 },
-  { name: "Ketchup (1 tbsp)", per100g: { kcal: 101, protein: 1.3, carbs: 25.8, fat: 0.1 }, grams: 17 },
 ];
 
 const SOURCE_BADGES: Record<FoodItem["source"], string> = {
-  vision: "🤖 AI",
-  barcode: "🏷️ UPC",
-  search: "🔍 DB",
-  manual: "✍️ Manual",
-  hidden_extra: "🧈 Extra",
+  vision: "🤖",
+  barcode: "🏷️",
+  search: "🔍",
+  manual: "✍️",
+  hidden_extra: "🧈",
 };
 
 export default function ReviewPage() {
@@ -40,7 +40,7 @@ export default function ReviewPage() {
     return raw ? (JSON.parse(raw) as ResolvedScan) : null;
   });
   const [mealType, setMealType] = useState<"breakfast" | "lunch" | "dinner" | "snacks">("lunch");
-  const [mealName, setMealName] = useState(scan?.mealName ?? "");
+  const [mealName, setMealName] = useState("");
   const [searchQ, setSearchQ] = useState("");
   const [searchResults, setSearchResults] = useState<FoodSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -53,11 +53,12 @@ export default function ReviewPage() {
 
   if (!scan) {
     return (
-      <main className="mx-auto max-w-md px-4 pb-28 pt-6 text-center">
+      <main className="mx-auto max-w-md px-4 pb-24 pt-20 text-center">
         <p className="card text-sm text-muted">
-          No scan in progress.{" "}
-          <Link href="/scan" className="text-accent underline">Start a scan</Link>{" "}
-          or <Link href="/search" className="text-accent underline">search foods</Link>.
+          Nothing to review.{" "}
+          <Link href="/dashboard/scan" className="underline">Scan a meal</Link>,{" "}
+          <Link href="/dashboard/barcode" className="underline">scan a barcode</Link>, or{" "}
+          <Link href="/dashboard/search" className="underline">search foods</Link>.
         </p>
       </main>
     );
@@ -65,12 +66,7 @@ export default function ReviewPage() {
 
   function updateItem(id: string, patch: Partial<FoodItem>) {
     setScan((s) =>
-      s
-        ? {
-            ...s,
-            items: s.items.map((it) => (it.id === id ? { ...it, ...patch } : it)),
-          }
-        : s
+      s ? { ...s, items: s.items.map((it) => (it.id === id ? { ...it, ...patch } : it)) } : s
     );
   }
 
@@ -135,7 +131,7 @@ export default function ReviewPage() {
           userId: "demo",
           logDate: todayLocalISO(),
           mealType,
-          name: mealName.trim() || "Unnamed meal",
+          name: mealName.trim() || scan.mealName || "Unnamed meal",
           entrySource: items.some((i) => i.source === "vision")
             ? ("vision" as const)
             : items.some((i) => i.source === "barcode")
@@ -156,7 +152,7 @@ export default function ReviewPage() {
         }),
       });
       sessionStorage.removeItem("fodtrack_scan");
-      router.push("/");
+      router.push("/dashboard");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Save failed");
     } finally {
@@ -165,46 +161,40 @@ export default function ReviewPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-md px-4 pb-40 pt-6">
-      <header className="mb-4 flex items-center justify-between">
-        <Link href="/scan" className="chip">← Rescan</Link>
-        <h1 className="text-lg font-bold">Review &amp; Adjust</h1>
-        <span className="w-16" />
+    <main className="mx-auto w-full max-w-2xl px-4 pb-40 pt-6 sm:px-6">
+      <header className="mb-6 flex items-center justify-between">
+        <Link href="/dashboard" className="chip">← Cancel</Link>
+        <h1 className="text-sm font-bold tracking-widest">REVIEW MEAL</h1>
+        <span className="w-20" />
       </header>
 
       {scan.suspectedHiddenFats && (
-        <div className="mb-4 rounded-xl border border-warn/40 bg-warn/10 p-3 text-xs text-warn">
-          ⚠️ AI flagged possible hidden fats (oil sheen, dressings, sauces).
-          Review the extras below before saving.
+        <div className="mb-4 rounded-lg border border-warn/40 bg-warn/10 p-3 text-xs text-warn">
+          ⚠ AI flagged possible hidden fats (oil sheen, dressings). Check the
+          extras below before saving.
         </div>
       )}
       {scan.unresolvedNames.length > 0 && (
-        <div className="mb-4 rounded-xl border border-line bg-surface-raised p-3 text-xs text-muted">
-          Couldn&apos;t match: {scan.unresolvedNames.join(", ")}. Macros are 0 —
-          edit grams or replace via search.
+        <div className="mb-4 rounded-lg border border-line bg-surface-raised p-3 text-xs text-muted">
+          Couldn&apos;t match: {scan.unresolvedNames.join(", ")} — macros are 0.
+          Adjust grams or replace via search.
         </div>
       )}
 
-      <section className="card mb-4 space-y-3">
+      <section className="card mb-4 grid gap-3 sm:grid-cols-2">
         <div>
           <label className="label" htmlFor="mealName">Meal name</label>
-          <input
-            id="mealName"
-            className="input"
-            value={mealName}
+          <input id="mealName" className="input" value={mealName}
             onChange={(e) => setMealName(e.target.value)}
-          />
+            placeholder={scan.mealName || "Unnamed meal"} />
         </div>
         <div>
           <span className="label">Meal type</span>
           <div className="grid grid-cols-4 gap-2">
             {(["breakfast", "lunch", "dinner", "snacks"] as const).map((t) => (
-              <button
-                key={t}
-                type="button"
-                className={`btn-ghost !px-1 !text-xs capitalize ${mealType === t ? "!border-accent !text-accent" : ""}`}
-                onClick={() => setMealType(t)}
-              >
+              <button key={t} type="button"
+                className={`btn-ghost !px-1 !text-xs capitalize ${mealType === t ? "!border-ink !font-medium" : ""}`}
+                onClick={() => setMealType(t)}>
                 {t}
               </button>
             ))}
@@ -222,19 +212,18 @@ export default function ReviewPage() {
             <li key={item.id} className="card">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold">
-                    {SOURCE_BADGES[item.source]} {item.name}
+                  <p className="truncate text-sm font-medium">
+                    <span aria-hidden className="mr-1">{SOURCE_BADGES[item.source]}</span>
+                    {item.name}
                   </p>
                   {item.brand && <p className="text-xs text-muted">{item.brand}</p>}
                   <p className="mt-0.5 text-xs text-muted">
                     {m.kcal} kcal · {m.protein}p {m.carbs}c {m.fat}f
                   </p>
                 </div>
-                <button
-                  aria-label={`Delete ${item.name}`}
+                <button aria-label={`Delete ${item.name}`}
                   className="rounded-lg px-2 py-1 text-bad hover:bg-bad/10"
-                  onClick={() => removeItem(item.id)}
-                >
+                  onClick={() => removeItem(item.id)}>
                   ✕
                 </button>
               </div>
@@ -268,15 +257,12 @@ export default function ReviewPage() {
       </section>
 
       <section className="card mb-4">
-        <SectionTitle>Add item (database search)</SectionTitle>
+        <SectionTitle>Add item (search all sources)</SectionTitle>
         <div className="flex gap-2">
-          <input
-            className="input"
-            placeholder="e.g. greek yogurt"
+          <input className="input" placeholder="e.g. omena, beans, avocado"
             value={searchQ}
             onChange={(e) => setSearchQ(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && void runSearch()}
-          />
+            onKeyDown={(e) => e.key === "Enter" && void runSearch()} />
           <button className="btn-ghost !px-3" onClick={runSearch} disabled={searching}>
             {searching ? <Spinner /> : "Find"}
           </button>
@@ -284,16 +270,11 @@ export default function ReviewPage() {
         {searchResults.length > 0 && (
           <ul className="mt-2 divide-y divide-line">
             {searchResults.map((r, i) => (
-              <li key={`${r.fdcId ?? r.name}-${i}`}>
-                <button
-                  className="w-full py-2 text-left text-sm"
-                  onClick={() => addItemFromResult(r)}
-                >
+              <li key={`${r.fdcId ?? r.source}-${i}`}>
+                <button className="w-full py-2 text-left text-sm" onClick={() => addItemFromResult(r)}>
                   <span className="font-medium">{r.name}</span>
-                  {r.brand && <span className="text-muted"> · {r.brand}</span>}
                   <span className="block text-xs text-muted">
                     {r.per100g.kcal} kcal/100g · {r.per100g.protein}p {r.per100g.carbs}c {r.per100g.fat}f
-                    {r.servingGrams ? ` · ${r.servingGrams}g serving` : ""}
                   </span>
                 </button>
               </li>
@@ -302,16 +283,18 @@ export default function ReviewPage() {
         )}
       </section>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md border-t border-line bg-surface/95 p-4 backdrop-blur">
-        <div className="mb-2 flex justify-between text-sm">
-          <span className="text-muted">Total</span>
-          <span className="font-bold">
-            {totals.kcal} kcal · {totals.protein}p / {totals.carbs}c / {totals.fat}f
-          </span>
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 p-4 backdrop-blur">
+        <div className="mx-auto max-w-2xl">
+          <div className="mb-2 flex justify-between text-sm">
+            <span className="text-muted">Total</span>
+            <span className="font-bold">
+              {totals.kcal} kcal · {totals.protein}p / {totals.carbs}c / {totals.fat}f
+            </span>
+          </div>
+          <button className="btn-primary w-full" onClick={save} disabled={saving || items.length === 0}>
+            {saving ? "Saving…" : "Save to daily log"}
+          </button>
         </div>
-        <button className="btn-primary w-full" onClick={save} disabled={saving || items.length === 0}>
-          {saving ? "Saving…" : "Save to daily log"}
-        </button>
       </div>
     </main>
   );

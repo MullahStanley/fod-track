@@ -183,7 +183,7 @@ export interface FoodSearchResult {
     fat: number;
   };
   servingGrams: number | null;
-  source: "usda" | "seed" | "openfoodfacts";
+  source: "usda" | "seed" | "openfoodfacts" | "local";
 }
 
 export interface BarcodeProduct {

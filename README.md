@@ -1,6 +1,10 @@
 # fod-track
 
-Fast, mobile-first AI nutrition tracker. Dual-mode logging (visual AI meal estimation + UPC barcode lookup), deterministic macro math, and a mandatory pre-log calibration screen — you never accept raw AI output.
+Fast, minimal AI nutrition tracker built for Kenya 🇰🇪 — dual-mode logging (AI meal photo estimation + UPC barcode lookup), a **local-first Kenyan food database** (ugali, sukuma wiki, nyama choma, githeri, omena…), deterministic macro math, and a mandatory pre-log calibration screen — you never accept raw AI output.
+
+- **Landing page** (`/`): what calorie tracking is, why it matters, FAQ — server-rendered, SEO-optimized (JSON-LD, sitemap, robots).
+- **App** (`/dashboard`): scan, barcode, search, review, targets.
+- **Theming**: light = black & white (default), dark = navy & white; `prefers-color-scheme` respected with a manual toggle and no flash-of-wrong-theme.
 
 ## Tech Stack
 
@@ -31,7 +35,8 @@ lib/
   resolve.ts            Vision/barcode/search → editable FoodItems (deterministic)
   provider-usda.ts      USDA FDC (server key)
   provider-off.ts       Open Food Facts (keyless)
-  seed-foods.ts         ~50-item offline food table
+  seed-foods.ts         ~50-item offline food table (global basics)
+  foods-kenya.ts        ~60-item Kenyan/East African offline DB (ugali, sukuma, choma, omena…)
   db.ts / repo-*.ts     SQLite schema + repositories
   validators.ts         zod schemas for all API bodies
 ```
@@ -42,7 +47,7 @@ lib/
 
 1. Client compresses photo → JPEG ≤1024px (`lib/client-utils.ts`).
 2. `lib/vision.ts` sends it to Gemini with a strict schema: components + `estimated_grams` + `confidence` + `suspected_hidden_fats` + `cooking_fats_or_extras`. The prompt explicitly forbids outputting calories/macros.
-3. `lib/resolve.ts` matches each component against USDA → seed DB and computes macros **deterministically** per 100g × grams.
+3. `lib/resolve.ts` matches each component **Kenyan DB → seed DB → USDA → OFF** (best term-coverage wins; ties favor the Kenyan DB) and computes macros **deterministically** per 100g × grams.
 4. Everything lands on `/review` as an editable breakdown — steppers, single-tap delete, database search to add missed items, one-tap hidden-fat extras (1 tbsp oil = 14g, etc.).
 5. Only after user review does `POST /api/logs` persist the meal.
 
@@ -88,7 +93,8 @@ Item macros are recomputed as `per100g × grams/100` everywhere — single sourc
 ## Resilience
 
 - No Gemini key → scan page explains and links to barcode/manual search.
-- USDA down/no key → seed database always answers.
+- USDA down/no key → Kenyan + seed databases always answer, offline.
+- Food search merges four sources: local Kenyan DB, seed DB, USDA (keyed), Open Food Facts text search (keyless) — deduped in that priority order.
 - Barcode not found/network error → friendly error with manual-search link.
 - Unresolvable vision items → kept as 0-macro placeholders flagged in review.
 

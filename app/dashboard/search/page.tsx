@@ -3,13 +3,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  apiJson,
-  todayLocalISO,
-  type FoodItem,
-  type FoodSearchResult,
-} from "@/lib/client-utils";
+import { apiJson, type FoodItem, type FoodSearchResult } from "@/lib/client-utils";
 import { SectionTitle, Spinner } from "@/components/ui";
+
+const SOURCE_LABEL: Record<FoodSearchResult["source"], string> = {
+  local: "🇰🇪 Local",
+  seed: "📘 Core",
+  usda: "🌍 USDA",
+  openfoodfacts: "🌐 OFF",
+};
 
 export default function SearchPage() {
   const router = useRouter();
@@ -36,7 +38,7 @@ export default function SearchPage() {
     }
   }
 
-  async function quickAdd(r: FoodSearchResult) {
+  function pick(r: FoodSearchResult) {
     const item: FoodItem = {
       id: `s_${Date.now().toString(36)}`,
       name: r.name,
@@ -48,7 +50,6 @@ export default function SearchPage() {
       source: "search",
       fdcId: r.fdcId,
     };
-    // Route through the review screen so grams stay editable before saving.
     sessionStorage.setItem(
       "fodtrack_scan",
       JSON.stringify({
@@ -58,33 +59,33 @@ export default function SearchPage() {
         unresolvedNames: [],
       })
     );
-    router.push("/review");
+    router.push("/dashboard/review");
   }
 
   return (
-    <main className="mx-auto w-full max-w-md px-4 pb-28 pt-6">
-      <header className="mb-4 flex items-center justify-between">
-        <Link href="/" className="chip">← Back</Link>
-        <h1 className="text-lg font-bold">Search Foods</h1>
-        <span className="w-14" />
+    <main className="mx-auto w-full max-w-2xl px-4 pb-24 pt-6 sm:px-6">
+      <header className="mb-6 flex items-center justify-between">
+        <Link href="/dashboard" className="chip">← Dashboard</Link>
+        <h1 className="text-sm font-bold tracking-widest">FOOD DATABASE</h1>
+        <span className="w-24" />
       </header>
 
       <section className="card mb-4">
         <div className="flex gap-2">
           <input
             className="input"
-            placeholder="Search 'chicken breast', 'greek yogurt'…"
+            placeholder="ugali, sukuma, chicken, githeri…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && void run()}
           />
           <button className="btn-primary !px-4" onClick={run} disabled={busy || !q.trim()}>
-            {busy ? <Spinner /> : "Go"}
+            {busy ? <Spinner /> : "Search"}
           </button>
         </div>
         <p className="mt-2 text-xs text-muted">
-          Searches USDA FoodData Central (when configured) with an offline seed
-          database as fallback.
+          Kenyan local foods first (ugali, sukuma wiki, nyama choma, omena…),
+          then core foods, USDA, and Open Food Facts. Local results work offline.
         </p>
       </section>
 
@@ -96,20 +97,23 @@ export default function SearchPage() {
 
       {results.length > 0 && (
         <section>
-          <SectionTitle>Results</SectionTitle>
-          <ul className="space-y-2">
+          <SectionTitle>{results.length} results</SectionTitle>
+          <ul className="grid gap-2 sm:grid-cols-2">
             {results.map((r, i) => (
-              <li key={`${r.fdcId ?? "s"}-${i}`} className="card">
+              <li key={`${r.fdcId ?? r.source}-${i}`} className="card">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold">{r.name}</p>
-                    {r.brand && <p className="text-xs text-muted">{r.brand}</p>}
+                    <p className="truncate text-sm font-medium">{r.name}</p>
                     <p className="text-xs text-muted">
+                      {SOURCE_LABEL[r.source]}
+                      {r.brand ? ` · ${r.brand}` : ""}
+                    </p>
+                    <p className="mt-1 text-xs text-muted">
                       {r.per100g.kcal} kcal/100g · {r.per100g.protein}p {r.per100g.carbs}c {r.per100g.fat}f
                       {r.servingGrams ? ` · ${r.servingGrams}g serving` : ""}
                     </p>
                   </div>
-                  <button className="chip !border-accent !text-accent" onClick={() => void quickAdd(r)}>
+                  <button className="chip !border-ink !font-medium" onClick={() => pick(r)}>
                     Add
                   </button>
                 </div>

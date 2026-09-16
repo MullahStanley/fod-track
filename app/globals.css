@@ -2,23 +2,49 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Light theme: black & white (default — best contrast & readability) */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+  --bg: 255 255 255;
+  --bg-raised: 250 250 250;
+  --bg-overlay: 244 244 245;
+  --line: 228 228 231;
+  --ink: 9 9 11;
+  --muted: 113 113 122;
+  --accent: 9 9 11;
+  --accent-contrast: 255 255 255;
+  --good: 21 128 61;
+  --warn: 161 98 7;
+  --bad: 220 38 38;
 }
 
-html,
+/* Dark theme: navy blue & white */
+.dark {
+  color-scheme: dark;
+  --bg: 11 18 32;
+  --bg-raised: 17 26 44;
+  --bg-overlay: 24 35 56;
+  --line: 34 48 74;
+  --ink: 229 237 247;
+  --muted: 130 150 179;
+  --accent: 255 255 255;
+  --accent-contrast: 11 18 32;
+  --good: 52 211 153;
+  --warn: 251 191 36;
+  --bad: 248 113 113;
+}
+
+html {
+  background: rgb(var(--bg));
+}
+
 body {
-  background: #0b1220;
-  color: #e5edf7;
+  color: rgb(var(--ink));
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
 
-body {
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Hide number input spinners for cleaner steppers */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -31,27 +57,27 @@ input[type="number"] {
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-line bg-surface-raised p-4;
+    @apply rounded-xl border border-line bg-surface-raised p-4;
   }
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition active:scale-[0.98] disabled:opacity-40;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition active:scale-[0.98] disabled:opacity-40;
   }
   .btn-primary {
-    @apply btn bg-accent text-surface hover:bg-accent-soft;
+    @apply btn bg-accent text-accent-contrast hover:opacity-90;
   }
   .btn-ghost {
-    @apply btn border border-line bg-transparent text-slate-200 hover:bg-surface-overlay;
+    @apply btn border border-line bg-transparent text-ink hover:bg-surface-overlay;
   }
   .btn-danger {
     @apply btn border border-bad/40 bg-bad/10 text-bad hover:bg-bad/20;
   }
   .input {
-    @apply w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-base text-slate-100 placeholder-muted outline-none focus:border-accent;
+    @apply w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink placeholder-muted outline-none focus:border-ink;
   }
   .label {
-    @apply mb-1 block text-xs font-medium uppercase tracking-wide text-muted;
+    @apply mb-1 block text-[11px] font-medium uppercase tracking-wider text-muted;
   }
   .chip {
-    @apply inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1 text-xs text-slate-300;
+    @apply inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1 text-xs text-ink;
   }
 }

@@ -1,251 +1,249 @@
-"use client";
-
-import { useCallback, useEffect, useState } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  apiJson,
-  formatDayLabel,
-  itemsTotals,
-  todayLocalISO,
-  type LoggedMeal,
-  type Profile,
-  type Targets,
-} from "@/lib/client-utils";
-import { EmptyState, MacroBar, SectionTitle } from "@/components/ui";
+import { ThemeToggle } from "@/components/theme";
 
-type Tab = "dashboard" | "history";
+export const metadata: Metadata = {
+  title: "fod-track — AI Calorie & Nutrition Tracking for Kenya",
+  description:
+    "Know what your plate costs you. AI meal scanning tuned for Kenyan and East African foods — ugali, sukuma, nyama choma, githeri — plus barcodes and global foods.",
+  alternates: { canonical: "/" },
+};
 
-function shiftDate(iso: string, delta: number): string {
-  const [y, m, d] = iso.split("-").map(Number);
-  const dt = new Date(y, (m ?? 1) - 1, (d ?? 1) + delta);
-  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(
-    dt.getDate()
-  ).padStart(2, "0")}`;
-}
+const FEATURES = [
+  {
+    icon: "📸",
+    title: "Snap your plate",
+    body: "One photo. The AI decomposes your meal into weighed components — ugali, sukuma, managu, choma — and estimates grams, never guesses calories.",
+  },
+  {
+    icon: "✋",
+    title: "You stay in control",
+    body: "Nothing is logged until you review it. Adjust grams, delete wrong items, add hidden oils and extras. The AI proposes; you decide.",
+  },
+  {
+    icon: "🏷️",
+    title: "Scan any barcode",
+    body: "Packaged products resolve through Open Food Facts — thousands of Kenyan supermarket items included.",
+  },
+  {
+    icon: "🇰🇪",
+    title: "Built for Kenyan plates",
+    body: "Local-first database: ugali, chapati, githeri, mukimo, pilau, omena, sukuma, managu, terere, matoke — offline, no API key needed.",
+  },
+  {
+    icon: "🎯",
+    title: "Real targets, not guesses",
+    body: "Mifflin-St Jeor BMR, activity-scaled TDEE, and macro goals tuned to fat loss, maintenance, or muscle gain.",
+  },
+  {
+    icon: "📴",
+    title: "Works on any phone",
+    body: "Minimal, fast, and light on data. Your log lives on your device's server — no account required to start.",
+  },
+];
 
-export default function HomePage() {
-  const [tab, setTab] = useState<Tab>("dashboard");
-  const [date, setDate] = useState(todayLocalISO());
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [targets, setTargets] = useState<Targets | null>(null);
-  const [meals, setMeals] = useState<LoggedMeal[]>([]);
-  const [recent, setRecent] = useState<LoggedMeal[][]>([]);
-  const [loading, setLoading] = useState(true);
+const FAQS = [
+  {
+    q: "How many calories should I eat per day?",
+    a: "It depends on your body and activity. fod-track computes your BMR with the Mifflin-St Jeor equation, multiplies by your activity level, then adjusts for your goal — fat loss, maintenance, or muscle gain. Most adults land between 1,600 and 3,000 kcal/day.",
+  },
+  {
+    q: "Does calorie tracking actually work?",
+    a: "Yes — consistently tracking intake, even roughly, is one of the strongest predictors of reaching a weight goal. People who log meals are far more likely to lose weight and keep it off than those who don't.",
+  },
+  {
+    q: "Can it recognize Kenyan foods?",
+    a: "That's the point. Ugali, sukuma wiki, githeri, mukimo, nyama choma, omena, chapati, mandazi, chai — the local database ships offline, and the AI scanner resolves ingredients against it first.",
+  },
+  {
+    q: "Is my data private?",
+    a: "Your profile and logs are stored in a local database, not sold or shared. Photos are analyzed and discarded — nothing is published.",
+  },
+  {
+    q: "Is it free?",
+    a: "Yes. The local food database, barcode lookup, and manual search are fully free. AI photo scanning uses a free-tier vision model.",
+  },
+  {
+    q: "Do I need an account?",
+    a: "No. Open the app, set your profile once, and start logging.",
+  },
+];
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [p, meals] = await Promise.all([
-        apiJson<{ profile: Profile; targets: Targets }>("/api/profile"),
-        apiJson<{ meals: LoggedMeal[] }>(`/api/logs?date=${date}`),
-      ]);
-      setProfile(p.profile);
-      setTargets(p.targets);
-      setMeals(meals.meals);
-      if (tab === "history") {
-        const h = await apiJson<{ days: LoggedMeal[][] }>(`/api/logs?days=14`);
-        setRecent(h.days);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [date, tab]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  const totals = itemsTotals(meals.flatMap((m) => m.items));
+export default function LandingPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        name: "fod-track",
+        applicationCategory: "HealthApplication",
+        operatingSystem: "Web",
+        description:
+          "AI calorie and nutrition tracker with Kenyan local foods, meal photo scanning, and barcode lookup.",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "KES" },
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: FAQS.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      },
+    ],
+  };
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 pb-28 pt-6">
-      <header className="mb-4">
-        <p className="text-xs font-semibold uppercase tracking-widest text-accent">
-          fod-track
-        </p>
-        <div className="mt-1 flex items-center justify-between">
-          <button
-            className="btn-ghost !px-3 !py-2"
-            onClick={() => setDate(shiftDate(date, -1))}
-            aria-label="Previous day"
-          >
-            ←
-          </button>
-          <div className="text-center">
-            <h1 className="text-lg font-bold">{formatDayLabel(date)}</h1>
-            {date === todayLocalISO() && (
-              <p className="text-xs text-muted">Today</p>
-            )}
-          </div>
-          <button
-            className="btn-ghost !px-3 !py-2"
-            onClick={() => setDate(shiftDate(date, 1))}
-            disabled={date >= todayLocalISO()}
-            aria-label="Next day"
-          >
-            →
-          </button>
-        </div>
-        <div className="mt-3 flex gap-2">
-          <button
-            className={`chip ${tab === "dashboard" ? "!border-accent !text-accent" : ""}`}
-            onClick={() => setTab("dashboard")}
-          >
-            Dashboard
-          </button>
-          <button
-            className={`chip ${tab === "history" ? "!border-accent !text-accent" : ""}`}
-            onClick={() => setTab("history")}
-          >
-            History
-          </button>
-        </div>
+    <div className="min-h-dvh">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-5">
+        <span className="text-sm font-bold tracking-widest">fod-track</span>
+        <nav className="flex items-center gap-2">
+          <ThemeToggle />
+          <Link href="/dashboard" className="btn-primary !py-2">Open app</Link>
+        </nav>
+        <div className="hidden" />
       </header>
 
-      {loading && <p className="text-sm text-muted">Loading…</p>}
-
-      {!loading && tab === "dashboard" && targets && profile && (
-        <>
-          <section className="card mb-4">
-            <div className="flex items-baseline justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-muted">Calories</p>
-                <p className="text-3xl font-bold">
-                  {totals.kcal}
-                  <span className="ml-1 text-base font-normal text-muted">
-                    / {targets.targetCalories} kcal
-                  </span>
-                </p>
-              </div>
-              <Link href="/profile" className="chip">
-                {profile.name || "Edit profile"} ⚙︎
-              </Link>
-            </div>
-            <div className="mt-4 space-y-3">
-              <MacroBar label="Protein" value={totals.protein} target={targets.proteinG} color="#22d3ee" />
-              <MacroBar label="Carbs" value={totals.carbs} target={targets.carbsG} color="#34d399" />
-              <MacroBar label="Fat" value={totals.fat} target={targets.fatG} color="#fbbf24" />
-            </div>
-          </section>
-
-          <section>
-            <SectionTitle right={<Link href="/scan" className="chip !border-accent !text-accent">+ Scan meal</Link>}>
-              Meals
-            </SectionTitle>
-            {meals.length === 0 ? (
-              <EmptyState
-                title="No meals logged"
-                hint="Use Scan or Search to add your first meal."
-              />
-            ) : (
-              <ul className="space-y-2">
-                {meals.map((meal) => (
-                  <MealCard key={meal.id} meal={meal} onDeleted={() => void load()} />
-                ))}
-              </ul>
-            )}
-          </section>
-        </>
-      )}
-
-      {!loading && tab === "history" && (
-        <section className="space-y-3">
-          {recent.length === 0 ? (
-            <EmptyState title="No history yet" hint="Logged meals will appear here." />
-          ) : (
-            recent.map((dayMeals) => {
-              const t = itemsTotals(dayMeals.flatMap((m) => m.items));
-              return (
-                <div key={dayMeals[0]?.logDate ?? Math.random()} className="card">
-                  <div className="flex items-baseline justify-between">
-                    <p className="text-sm font-semibold">
-                      {formatDayLabel(dayMeals[0]?.logDate ?? "")}
-                    </p>
-                    <p className="text-sm text-muted">
-                      {t.kcal} kcal · {t.protein}p / {t.carbs}c / {t.fat}f
-                    </p>
-                  </div>
-                  <p className="mt-1 text-xs text-muted">
-                    {dayMeals.length} meal{dayMeals.length === 1 ? "" : "s"} logged
-                  </p>
-                </div>
-              );
-            })
-          )}
-        </section>
-      )}
-
-      <TabBar />
-    </main>
-  );
-}
-
-function MealCard({ meal, onDeleted }: { meal: LoggedMeal; onDeleted: () => void }) {
-  const [busy, setBusy] = useState(false);
-
-  async function remove() {
-    setBusy(true);
-    try {
-      await apiJson(`/api/logs?id=${meal.id}`, { method: "DELETE" });
-      onDeleted();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <li className="card">
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="text-sm font-semibold">{meal.name}</p>
-          <p className="text-xs text-muted">
-            {meal.mealType} · {meal.items.length} item{meal.items.length === 1 ? "" : "s"}
-            {meal.suspectedHiddenFats ? " · hidden fats flagged" : ""}
-          </p>
+      {/* Hero */}
+      <section className="mx-auto w-full max-w-6xl px-5 pb-16 pt-10 text-center sm:pt-16">
+        <p className="mb-4 inline-block rounded-full border border-line px-3 py-1 text-xs text-muted">
+          Built for Kenya 🇰🇪 · Free · No account needed
+        </p>
+        <h1 className="mx-auto max-w-3xl text-4xl font-bold leading-tight tracking-tight sm:text-6xl">
+          Know what your plate
+          <span className="block">costs you.</span>
+        </h1>
+        <p className="mx-auto mt-5 max-w-xl text-base text-muted sm:text-lg">
+          Snap a photo of ugali and sukuma, scan a barcode, or search the local
+          database. fod-track turns any meal into calories and macros — and you
+          approve every number before it counts.
+        </p>
+        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Link href="/dashboard" className="btn-primary w-full max-w-xs sm:w-auto">
+            Start tracking free
+          </Link>
+          <Link href="/dashboard" className="btn-ghost w-full max-w-xs sm:w-auto">
+            See how it works ↓
+          </Link>
         </div>
-        <div className="text-right">
-          <p className="text-sm font-bold">{meal.totals.kcal} kcal</p>
-          <p className="text-xs text-muted">
-            {meal.totals.protein}p / {meal.totals.carbs}c / {meal.totals.fat}f
-          </p>
-        </div>
-      </div>
-      <button
-        className="btn-danger mt-3 !py-1.5 !text-xs"
-        onClick={remove}
-        disabled={busy}
-      >
-        {busy ? "Deleting…" : "Delete"}
-      </button>
-    </li>
-  );
-}
+        <p className="mt-4 text-xs text-muted">
+          No sign-up · Works offline for local foods · Your data stays yours
+        </p>
+      </section>
 
-function TabBar() {
-  return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md border-t border-line bg-surface/95 px-4 py-3 backdrop-blur">
-      <div className="grid grid-cols-4 gap-2 text-center text-xs">
-        <Link href="/" className="text-accent">
-          <span className="block text-lg">🏠</span>
-          Home
-        </Link>
-        <Link href="/scan" className="text-slate-300">
-          <span className="block text-lg">📸</span>
-          Scan
-        </Link>
-        <Link href="/barcode" className="text-slate-300">
-          <span className="block text-lg">🏷️</span>
-          Barcode
-        </Link>
-        <Link href="/profile" className="text-slate-300">
-          <span className="block text-lg">⚙️</span>
-          Profile
-        </Link>
-      </div>
-    </nav>
+      {/* Why tracking matters */}
+      <section className="border-y border-line bg-surface-raised">
+        <div className="mx-auto w-full max-w-6xl px-5 py-16">
+          <h2 className="text-center text-2xl font-bold sm:text-3xl">
+            Why bother counting calories?
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-muted sm:text-base">
+            You can't manage what you don't measure. Portion sizes have grown,
+            "healthy" foods hide calories, and guessing fails silently.
+          </p>
+          <div className="mt-10 grid gap-6 sm:grid-cols-3">
+            <div className="card">
+              <p className="text-2xl">⚖️</p>
+              <h3 className="mt-2 font-semibold">Weight change is math</h3>
+              <p className="mt-1 text-sm text-muted">
+                Fat loss needs a sustained calorie deficit; muscle needs a
+                surplus. Tracking is the only way to know which side of the
+                equation you're on.
+              </p>
+            </div>
+            <div className="card">
+              <p className="text-2xl">👀</p>
+              <h3 className="mt-2 font-semibold">Portions deceive</h3>
+              <p className="mt-1 text-sm text-muted">
+                A "small" plate of ugali with chai can quietly carry half a
+                day's energy. Seeing the numbers ends the guessing.
+              </p>
+            </div>
+            <div className="card">
+              <p className="text-2xl">📊</p>
+              <h3 className="mt-2 font-semibold">Logging changes behavior</h3>
+              <p className="mt-1 text-sm text-muted">
+                Studies consistently show people who log meals lose more weight
+                than those who don't — the act of tracking itself improves
+                choices.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="mx-auto w-full max-w-6xl px-5 py-16">
+        <h2 className="text-center text-2xl font-bold sm:text-3xl">
+          Everything you need, nothing you don't
+        </h2>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map((f) => (
+            <div key={f.title} className="card">
+              <p className="text-xl">{f.icon}</p>
+              <h3 className="mt-2 font-semibold">{f.title}</h3>
+              <p className="mt-1 text-sm text-muted">{f.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="border-y border-line bg-surface-raised">
+        <div className="mx-auto w-full max-w-6xl px-5 py-16">
+          <h2 className="text-center text-2xl font-bold sm:text-3xl">How it works</h2>
+          <ol className="mx-auto mt-10 grid max-w-4xl gap-6 sm:grid-cols-3">
+            {[
+              "Set your profile — sex, age, weight, height, activity, goal.",
+              "Snap the plate or scan the barcode. The AI weighs components, not calories.",
+              "Review the breakdown, adjust grams, save. Progress bars update instantly.",
+            ].map((step, i) => (
+              <li key={i} className="text-center">
+                <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border border-line text-lg font-bold">
+                  {i + 1}
+                </span>
+                <p className="mt-3 text-sm text-muted">{step}</p>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-10 text-center">
+            <Link href="/dashboard" className="btn-primary">
+              Start tracking free
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="mx-auto w-full max-w-3xl px-5 py-16">
+        <h2 className="text-center text-2xl font-bold sm:text-3xl">
+          Frequently asked questions
+        </h2>
+        <div className="mt-8 space-y-3">
+          {FAQS.map((f) => (
+            <details key={f.q} className="card">
+              <summary className="cursor-pointer font-medium">{f.q}</summary>
+              <p className="mt-2 text-sm text-muted">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <footer className="border-t border-line">
+        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-3 px-5 py-8 text-xs text-muted sm:flex-row">
+          <p>© {new Date().getFullYear()} fod-track. Nutrition data from USDA FDC, Open Food Facts, and regional food composition tables.</p>
+          <div className="flex gap-4">
+            <Link href="/dashboard">Open app</Link>
+            <Link href="/dashboard/profile">Set targets</Link>
+          </div>
+          <span className="hidden">.</span>
+        </div>
+      </footer>
+    </div>
   );
 }

@@ -3,7 +3,9 @@
  * with deterministic macros computed from per-100g database values.
  */
 import { findSeedFoodByName, searchSeedFoods } from "./seed-foods";
+import { findKenyaFoodByName, searchKenyaFoods } from "./foods-kenya";
 import { hasUsdaKey, searchUsdaFoods } from "./provider-usda";
+import { searchOpenFoodFacts } from "./provider-off";
 import type {
   BarcodeProduct,
   FoodItem,
@@ -17,18 +19,31 @@ function nextItemId(): string {
   return `item_${Date.now().toString(36)}_${idCounter}`;
 }
 
-/** USDA first (if keyed), seed fallback, merged + deduped by name. */
+/**
+ * Local-first merged search across all sources:
+ * 1. Kenyan local DB (always, offline)
+ * 2. Generic seed DB (always, offline)
+ * 3. USDA FDC (when keyed)
+ * 4. Open Food Facts text search (keyless, best-effort)
+ * Results are deduped by normalized name in that priority order.
+ */
 export async function searchFoods(query: string, limit = 12): Promise<FoodSearchResult[]> {
   const q = query.trim();
   if (!q) return [];
 
-  const results: FoodSearchResult[] = [];
-  if (hasUsdaKey()) {
-    results.push(...(await searchUsdaFoods(q, limit)));
-  }
-  results.push(...searchSeedFoods(q, limit));
+  const results: FoodSearchResult[] = [
+    ...searchKenyaFoods(q, limit),
+    ...searchSeedFoods(q, limit),
+  ];
 
-  // Dedupe by normalized name, keeping USDA (more precise) first.
+  const [usda, off] = await Promise.allSettled([
+    hasUsdaKey() ? searchUsdaFoods(q, limit) : Promise.resolve([]),
+    searchOpenFoodFacts(q, Math.min(8, limit)),
+  ]);
+  if (usda.status === "fulfilled") results.push(...usda.value);
+  if (off.status === "fulfilled") results.push(...off.value);
+
+  // Dedupe by normalized name, keeping higher-priority sources first.
   const seen = new Set<string>();
   const out: FoodSearchResult[] = [];
   for (const r of results) {
@@ -42,19 +57,56 @@ export async function searchFoods(query: string, limit = 12): Promise<FoodSearch
   return out;
 }
 
-/** Resolve one vision-identified ingredient to database macros. */
+/**
+ * Best offline match for a vision-identified ingredient: compare Kenya and
+ * generic seed candidates by how many query terms each name covers, breaking
+ * ties in favor of the Kenyan DB (target-audience context).
+ */
+function bestOfflineMatch(name: string): FoodSearchResult | null {
+  const terms = name
+    .toLowerCase()
+    .split(/[^a-z]+/)
+    .filter(Boolean);
+  if (terms.length === 0) return null;
+
+  const coverage = (r: FoodSearchResult): number => {
+    const words = r.name.toLowerCase().split(/[^a-z]+/);
+    return terms.filter((t) => words.some((w) => w === t || w.startsWith(t))).length;
+  };
+
+  const candidates = [
+    ...searchKenyaFoods(name, 3),
+    ...searchSeedFoods(name, 3),
+  ];
+  if (candidates.length === 0) return null;
+
+  let best = candidates[0];
+  let bestScore = coverage(best);
+  for (const c of candidates.slice(1)) {
+    const s = coverage(c);
+    // Strictly greater: earlier sources (Kenya first) win ties.
+    if (s > bestScore) {
+      best = c;
+      bestScore = s;
+    }
+  }
+
+  // Require most of the phrase to match: all terms for short names, ≥60% for
+  // longer ones. Stops "gibberish fat" resolving to "beef with fat".
+  const minTerms = terms.length <= 2 ? terms.length : Math.ceil(terms.length * 0.6);
+  return bestScore >= minTerms ? best : null;
+}
+
+/** Resolve one vision-identified ingredient against offline DBs, then USDA. */
 async function resolveVisionItem(
   name: string,
   grams: number,
   source: FoodItem["source"]
 ): Promise<FoodItem> {
-  let match: FoodSearchResult | null = null;
-  if (hasUsdaKey()) {
+  let match: FoodSearchResult | null = bestOfflineMatch(name);
+  if (!match && hasUsdaKey()) {
     const usda = await searchUsdaFoods(name, 1);
     match = usda[0] ?? null;
-  }
-  if (!match) {
-    match = findSeedFoodByName(name);
   }
 
   if (match) {
