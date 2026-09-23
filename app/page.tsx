@@ -127,7 +127,7 @@ export default function LandingPage() {
           <Link href="/dashboard" className="btn-primary w-full max-w-xs sm:w-auto">
             Start tracking free
           </Link>
-          <Link href="/dashboard" className="btn-ghost w-full max-w-xs sm:w-auto">
+          <Link href="/how-it-works" className="btn-ghost w-full max-w-xs sm:w-auto">
             See how it works ↓
           </Link>
         </div>
@@ -238,10 +238,10 @@ export default function LandingPage() {
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-3 px-5 py-8 text-xs text-muted sm:flex-row">
           <p>© {new Date().getFullYear()} fod-track. Nutrition data from USDA FDC, Open Food Facts, and regional food composition tables.</p>
           <div className="flex gap-4">
+            <Link href="/how-it-works">How it works</Link>
             <Link href="/dashboard">Open app</Link>
             <Link href="/dashboard/profile">Set targets</Link>
           </div>
-          <span className="hidden">.</span>
         </div>
       </footer>
     </div>

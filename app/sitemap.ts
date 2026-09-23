@@ -4,6 +4,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://fod-track.app";
   return [
     { url: base, changeFrequency: "weekly", priority: 1 },
+    { url: `${base}/how-it-works`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/dashboard`, changeFrequency: "daily", priority: 0.9 },
   ];
 }
