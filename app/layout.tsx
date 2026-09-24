@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThemeScript } from "@/components/theme";
+import { GalaxyBackground } from "@/components/galaxy-background";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://fod-track.app"),
@@ -50,7 +51,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <ThemeScript />
       </head>
-      <body className="min-h-dvh antialiased">{children}</body>
+      <body className="min-h-dvh antialiased text-ink relative selection:bg-emerald-500/30">
+        <GalaxyBackground />
+        <div className="relative z-10 flex min-h-dvh flex-col">
+          {children}
+        </div>
+      </body>
     </html>
   );
 }

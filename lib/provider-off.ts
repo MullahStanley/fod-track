@@ -3,8 +3,11 @@
  * Docs: https://openfoodfacts.github.io/openfoodfacts-server/api/
  */
 import type { BarcodeProduct, FoodSearchResult } from "./types";
+import { findSeedBarcode } from "./seed-barcodes";
 
 const OFF_UA = "fod-track/0.1 (nutrition tracker)";
+
+const barcodeCache = new Map<string, BarcodeLookupResult>();
 
 function baseUrl(): string {
   return process.env.OFF_BASE_URL || "https://world.openfoodfacts.org";
@@ -71,6 +74,18 @@ export interface BarcodeLookupResult {
 export async function lookupBarcode(barcode: string): Promise<BarcodeLookupResult> {
   const clean = barcode.replace(/\D/g, "");
   if (!clean) return { ok: false, reason: "not_found" };
+
+  if (barcodeCache.has(clean)) {
+    return barcodeCache.get(clean)!;
+  }
+
+  // Check offline seed database first
+  const seed = findSeedBarcode(clean);
+  if (seed) {
+    const res: BarcodeLookupResult = { ok: true, product: seed };
+    barcodeCache.set(clean, res);
+    return res;
+  }
 
   const url = `${baseUrl()}/api/v2/product/${clean}.json?fields=product_name,product_name_en,brands,serving_size,serving_quantity,nutriments`;
 
@@ -149,7 +164,7 @@ export async function lookupBarcode(barcode: string): Promise<BarcodeLookupResul
     return { ok: false, reason: "incomplete_data" };
   }
 
-  return {
+  const result: BarcodeLookupResult = {
     ok: true,
     product: {
       barcode: clean,
@@ -158,6 +173,8 @@ export async function lookupBarcode(barcode: string): Promise<BarcodeLookupResul
       serving,
     },
   };
+  barcodeCache.set(clean, result);
+  return result;
 }
 
 function round1(n: number): number {

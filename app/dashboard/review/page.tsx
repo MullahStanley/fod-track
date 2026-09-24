@@ -16,20 +16,22 @@ import {
 import { GramStepper, SectionTitle, Spinner } from "@/components/ui";
 
 const HIDDEN_EXTRA_PRESETS = [
-  { name: "Cooking oil (1 tbsp)", per100g: { kcal: 884, protein: 0, carbs: 0, fat: 100 }, grams: 14 },
-  { name: "Butter (1 tbsp)", per100g: { kcal: 717, protein: 0.9, carbs: 0.1, fat: 81 }, grams: 14 },
-  { name: "Sugar (1 tsp)", per100g: { kcal: 387, protein: 0, carbs: 100, fat: 0 }, grams: 4 },
-  { name: "Chai with sugar (cup)", per100g: { kcal: 45, protein: 1.6, carbs: 6.5, fat: 1.6 }, grams: 200 },
-  { name: "Mayonnaise (1 tbsp)", per100g: { kcal: 680, protein: 1, carbs: 0.6, fat: 75 }, grams: 14 },
-  { name: "Ranch dressing", per100g: { kcal: 430, protein: 1, carbs: 6, fat: 45 }, grams: 30 },
+  { name: "Cooking oil (1 tbsp / 14g)", per100g: { kcal: 884, protein: 0, carbs: 0, fat: 100 }, grams: 14 },
+  { name: "Butter (1 tbsp / 14g)", per100g: { kcal: 717, protein: 0.9, carbs: 0.1, fat: 81 }, grams: 14 },
+  { name: "Blue Band Margarine (1 tbsp / 10g)", per100g: { kcal: 720, protein: 0, carbs: 0.5, fat: 80 }, grams: 10 },
+  { name: "Chai with sugar (1 cup / 200ml)", per100g: { kcal: 45, protein: 1.6, carbs: 6.5, fat: 1.6 }, grams: 200 },
+  { name: "Kachumbari side (100g)", per100g: { kcal: 28, protein: 1.1, carbs: 5.5, fat: 0.3 }, grams: 100 },
+  { name: "Avocado slice (50g)", per100g: { kcal: 160, protein: 2, carbs: 8.5, fat: 15 }, grams: 50 },
+  { name: "Sugar (1 tsp / 4g)", per100g: { kcal: 387, protein: 0, carbs: 100, fat: 0 }, grams: 4 },
+  { name: "Mayonnaise (1 tbsp / 14g)", per100g: { kcal: 680, protein: 1, carbs: 0.6, fat: 75 }, grams: 14 },
 ];
 
 const SOURCE_BADGES: Record<FoodItem["source"], string> = {
-  vision: "🤖",
-  barcode: "🏷️",
-  search: "🔍",
-  manual: "✍️",
-  hidden_extra: "🧈",
+  vision: "🤖 AI Scan",
+  barcode: "🏷️ Barcode",
+  search: "🔍 Database",
+  manual: "✍️ Manual",
+  hidden_extra: "🧈 Extra",
 };
 
 export default function ReviewPage() {
@@ -53,13 +55,27 @@ export default function ReviewPage() {
 
   if (!scan) {
     return (
-      <main className="mx-auto max-w-md px-4 pb-24 pt-20 text-center">
-        <p className="card text-sm text-muted">
-          Nothing to review.{" "}
-          <Link href="/dashboard/scan" className="underline">Scan a meal</Link>,{" "}
-          <Link href="/dashboard/barcode" className="underline">scan a barcode</Link>, or{" "}
-          <Link href="/dashboard/search" className="underline">search foods</Link>.
-        </p>
+      <main className="relative z-10 mx-auto max-w-md px-4 pb-24 pt-20 text-center">
+        <div className="card border-white/10 bg-surface-raised/85 shadow-2xl backdrop-blur-xl py-10">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-xl">
+            🍽️
+          </div>
+          <h2 className="text-base font-bold text-ink mb-1">No Meal in Calibration Buffer</h2>
+          <p className="text-xs text-muted mb-6">
+            Start by scanning a plate photo, looking up a barcode, or searching the food database.
+          </p>
+          <div className="flex flex-col gap-2 max-w-xs mx-auto">
+            <Link href="/dashboard/scan" className="btn-primary !py-2.5">
+              📸 AI Photo Scan
+            </Link>
+            <Link href="/dashboard/barcode" className="btn-ghost !py-2.5">
+              🏷️ Scan Barcode
+            </Link>
+            <Link href="/dashboard/search" className="btn-ghost !py-2.5">
+              🔍 Search Kenyan Foods
+            </Link>
+          </div>
+        </div>
       </main>
     );
   }
@@ -161,40 +177,119 @@ export default function ReviewPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 pb-40 pt-6 sm:px-6">
+    <main className="relative z-10 mx-auto w-full max-w-2xl px-4 pb-44 pt-6 sm:px-6">
       <header className="mb-6 flex items-center justify-between">
-        <Link href="/dashboard" className="chip">← Cancel</Link>
-        <h1 className="text-sm font-bold tracking-widest">REVIEW MEAL</h1>
+        <Link href="/dashboard" className="chip backdrop-blur-md">
+          ← Cancel
+        </Link>
+        <div className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+          <h1 className="text-sm font-bold tracking-widest text-ink">
+            PRE-LOG CALIBRATION
+          </h1>
+        </div>
         <span className="w-20" />
       </header>
 
+      {/* Warnings & Notices */}
       {scan.suspectedHiddenFats && (
-        <div className="mb-4 rounded-lg border border-warn/40 bg-warn/10 p-3 text-xs text-warn">
-          ⚠ AI flagged possible hidden fats (oil sheen, dressings). Check the
-          extras below before saving.
-        </div>
-      )}
-      {scan.unresolvedNames.length > 0 && (
-        <div className="mb-4 rounded-lg border border-line bg-surface-raised p-3 text-xs text-muted">
-          Couldn&apos;t match: {scan.unresolvedNames.join(", ")} — macros are 0.
-          Adjust grams or replace via search.
+        <div className="mb-4 rounded-xl border border-warn/40 bg-warn/10 p-3.5 text-xs text-warn backdrop-blur-md flex items-start gap-2.5">
+          <span className="text-base">⚠️</span>
+          <div>
+            <span className="font-bold">Hidden oils/fats flagged by AI vision.</span>
+            <p className="mt-0.5 text-slate-300">
+              Check the cooking oils or dressing items below and adjust their grams if needed.
+            </p>
+          </div>
         </div>
       )}
 
-      <section className="card mb-4 grid gap-3 sm:grid-cols-2">
+      {scan.unresolvedNames.length > 0 && (
+        <div className="mb-4 rounded-xl border border-line bg-surface-raised/80 p-3 text-xs text-muted backdrop-blur-md">
+          Couldn&apos;t match: {scan.unresolvedNames.join(", ")} — default macros are 0.
+          Adjust grams or use the search below to replace with a verified entry.
+        </div>
+      )}
+
+      {/* Totals Summary Card */}
+      <section className="card mb-4 border-white/15 bg-surface-raised/85 shadow-2xl backdrop-blur-xl">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 text-center">
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-2.5">
+            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+              Total Energy
+            </span>
+            <p className="text-2xl font-extrabold text-emerald-400 font-mono mt-0.5">
+              {totals.kcal}
+            </p>
+            <span className="text-[10px] text-muted">kcal</span>
+          </div>
+
+          <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-2.5">
+            <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">
+              Protein
+            </span>
+            <p className="text-2xl font-extrabold text-cyan-400 font-mono mt-0.5">
+              {totals.protein}g
+            </p>
+            <span className="text-[10px] text-muted">
+              {Math.round(((totals.protein * 4) / Math.max(1, totals.kcal)) * 100)}% kcal
+            </span>
+          </div>
+
+          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-2.5">
+            <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">
+              Carbs
+            </span>
+            <p className="text-2xl font-extrabold text-amber-400 font-mono mt-0.5">
+              {totals.carbs}g
+            </p>
+            <span className="text-[10px] text-muted">
+              {Math.round(((totals.carbs * 4) / Math.max(1, totals.kcal)) * 100)}% kcal
+            </span>
+          </div>
+
+          <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-2.5">
+            <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">
+              Fats
+            </span>
+            <p className="text-2xl font-extrabold text-rose-400 font-mono mt-0.5">
+              {totals.fat}g
+            </p>
+            <span className="text-[10px] text-muted">
+              {Math.round(((totals.fat * 9) / Math.max(1, totals.kcal)) * 100)}% kcal
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Meal Metadata */}
+      <section className="card mb-4 grid gap-3 sm:grid-cols-2 border-white/10 bg-surface-raised/80">
         <div>
-          <label className="label" htmlFor="mealName">Meal name</label>
-          <input id="mealName" className="input" value={mealName}
+          <label className="label" htmlFor="mealName">
+            Meal name
+          </label>
+          <input
+            id="mealName"
+            className="input"
+            value={mealName}
             onChange={(e) => setMealName(e.target.value)}
-            placeholder={scan.mealName || "Unnamed meal"} />
+            placeholder={scan.mealName || "Unnamed meal"}
+          />
         </div>
         <div>
           <span className="label">Meal type</span>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-1.5">
             {(["breakfast", "lunch", "dinner", "snacks"] as const).map((t) => (
-              <button key={t} type="button"
-                className={`btn-ghost !px-1 !text-xs capitalize ${mealType === t ? "!border-ink !font-medium" : ""}`}
-                onClick={() => setMealType(t)}>
+              <button
+                key={t}
+                type="button"
+                className={`chip !justify-center !px-1 capitalize !text-[11px] ${
+                  mealType === t
+                    ? "!border-emerald-400 !bg-emerald-500/20 !text-emerald-300 font-bold"
+                    : "hover:border-white/20"
+                }`}
+                onClick={() => setMealType(t)}
+              >
                 {t}
               </button>
             ))}
@@ -202,53 +297,106 @@ export default function ReviewPage() {
         </div>
       </section>
 
-      <SectionTitle right={<span className="text-xs text-muted">{totals.kcal} kcal total</span>}>
-        Items
+      {/* Items Breakdown with Steppers */}
+      <SectionTitle
+        right={
+          <span className="text-xs font-mono font-semibold text-muted">
+            {items.length} component{items.length === 1 ? "" : "s"}
+          </span>
+        }
+      >
+        Verified Plate Components
       </SectionTitle>
-      <ul className="mb-4 space-y-2">
+
+      <ul className="mb-4 space-y-2.5">
         {items.map((item) => {
           const m = itemMacros(item);
           return (
-            <li key={item.id} className="card">
+            <li
+              key={item.id}
+              className="card border-white/10 hover:border-white/20 transition-all bg-surface-raised/85"
+            >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">
-                    <span aria-hidden className="mr-1">{SOURCE_BADGES[item.source]}</span>
-                    {item.name}
-                  </p>
-                  {item.brand && <p className="text-xs text-muted">{item.brand}</p>}
-                  <p className="mt-0.5 text-xs text-muted">
-                    {m.kcal} kcal · {m.protein}p {m.carbs}c {m.fat}f
+                  <div className="flex items-center gap-1.5">
+                    <span className="chip !py-0 !px-1.5 !text-[10px] font-semibold text-emerald-300 !border-emerald-500/30">
+                      {SOURCE_BADGES[item.source]}
+                    </span>
+                    <p className="truncate text-sm font-bold text-ink">{item.name}</p>
+                  </div>
+                  {item.brand && <p className="text-xs text-muted mt-0.5">{item.brand}</p>}
+                  <p className="mt-1 font-mono text-xs text-muted">
+                    <span className="font-bold text-emerald-400">{m.kcal} kcal</span> · {m.protein}p {m.carbs}c {m.fat}f
                   </p>
                 </div>
-                <button aria-label={`Delete ${item.name}`}
-                  className="rounded-lg px-2 py-1 text-bad hover:bg-bad/10"
-                  onClick={() => removeItem(item.id)}>
+
+                <button
+                  aria-label={`Delete ${item.name}`}
+                  className="rounded-lg p-1 text-bad hover:bg-bad/10 text-sm font-bold transition"
+                  onClick={() => removeItem(item.id)}
+                  title="Remove item"
+                >
                   ✕
                 </button>
               </div>
-              <div className="mt-2">
-                <GramStepper grams={item.grams} onChange={(g) => updateItem(item.id, { grams: g })} />
+
+              {/* Stepper & Quick multipliers */}
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line/50 pt-2.5">
+                <GramStepper
+                  grams={item.grams}
+                  onChange={(g) => updateItem(item.id, { grams: g })}
+                />
+
+                <div className="flex gap-1">
+                  {[0.5, 1, 1.5, 2].map((factor) => {
+                    const baseG = item.servingGrams ?? 100;
+                    return (
+                      <button
+                        key={factor}
+                        type="button"
+                        className="chip !px-2 !py-0.5 !text-[10px] hover:border-emerald-400"
+                        onClick={() =>
+                          updateItem(item.id, { grams: Math.round(baseG * factor) })
+                        }
+                      >
+                        {factor}×
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </li>
           );
         })}
       </ul>
 
-      <section className="card mb-4">
-        <SectionTitle
-          right={
-            <button className="chip" onClick={() => setShowExtras((v) => !v)}>
-              {showExtras ? "Hide" : "Show"}
-            </button>
-          }
-        >
-          Hidden fats &amp; extras
-        </SectionTitle>
+      {/* Hidden Fats & Extras Tray */}
+      <section className="card mb-4 border-white/10 bg-surface-raised/80">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted">
+              Add Hidden Fats & Extras
+            </h3>
+            <p className="text-[11px] text-muted">
+              Oils, butter, chai, dressings often omitted from meal photos
+            </p>
+          </div>
+          <button
+            className="chip !text-[11px] font-medium"
+            onClick={() => setShowExtras((v) => !v)}
+          >
+            {showExtras ? "Hide ▲" : "Show ▼"}
+          </button>
+        </div>
+
         {showExtras && (
-          <div className="flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-1.5 pt-3 border-t border-line/50">
             {HIDDEN_EXTRA_PRESETS.map((p) => (
-              <button key={p.name} className="chip" onClick={() => addHiddenExtra(p)}>
+              <button
+                key={p.name}
+                className="chip text-[11px] hover:border-emerald-400 hover:text-emerald-300 transition"
+                onClick={() => addHiddenExtra(p)}
+              >
                 + {p.name}
               </button>
             ))}
@@ -256,26 +404,44 @@ export default function ReviewPage() {
         )}
       </section>
 
-      <section className="card mb-4">
-        <SectionTitle>Add item (search all sources)</SectionTitle>
+      {/* Add Missing Items via Search */}
+      <section className="card mb-4 border-white/10 bg-surface-raised/80">
+        <SectionTitle>Add extra ingredient from database</SectionTitle>
         <div className="flex gap-2">
-          <input className="input" placeholder="e.g. omena, beans, avocado"
+          <input
+            className="input"
+            placeholder="Search avocado, omena, beans, rice…"
             value={searchQ}
             onChange={(e) => setSearchQ(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && void runSearch()} />
-          <button className="btn-ghost !px-3" onClick={runSearch} disabled={searching}>
-            {searching ? <Spinner /> : "Find"}
+            onKeyDown={(e) => e.key === "Enter" && void runSearch()}
+          />
+          <button
+            className="btn-ghost !px-4"
+            onClick={runSearch}
+            disabled={searching || !searchQ.trim()}
+          >
+            {searching ? <Spinner /> : "Search"}
           </button>
         </div>
+
         {searchResults.length > 0 && (
-          <ul className="mt-2 divide-y divide-line">
+          <ul className="mt-3 space-y-1.5 border-t border-line/60 pt-3">
             {searchResults.map((r, i) => (
-              <li key={`${r.fdcId ?? r.source}-${i}`}>
-                <button className="w-full py-2 text-left text-sm" onClick={() => addItemFromResult(r)}>
-                  <span className="font-medium">{r.name}</span>
-                  <span className="block text-xs text-muted">
+              <li
+                key={`${r.fdcId ?? r.source}-${i}`}
+                className="flex items-center justify-between rounded-xl bg-surface/40 p-2.5 hover:bg-surface/70 transition"
+              >
+                <div className="min-w-0 pr-2">
+                  <p className="truncate text-xs font-bold text-ink">{r.name}</p>
+                  <p className="text-[10px] text-muted font-mono">
                     {r.per100g.kcal} kcal/100g · {r.per100g.protein}p {r.per100g.carbs}c {r.per100g.fat}f
-                  </span>
+                  </p>
+                </div>
+                <button
+                  className="chip !border-emerald-500/30 text-emerald-400 font-bold shrink-0 hover:bg-emerald-500/10"
+                  onClick={() => addItemFromResult(r)}
+                >
+                  + Add
                 </button>
               </li>
             ))}
@@ -283,16 +449,24 @@ export default function ReviewPage() {
         )}
       </section>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 p-4 backdrop-blur">
+      {/* Floating Save Footer */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-slate-950/90 p-4 backdrop-blur-xl">
         <div className="mx-auto max-w-2xl">
-          <div className="mb-2 flex justify-between text-sm">
-            <span className="text-muted">Total</span>
-            <span className="font-bold">
+          <div className="mb-2 flex items-baseline justify-between text-sm">
+            <span className="text-xs font-semibold uppercase text-muted tracking-wider">
+              Calibrated Meal Total
+            </span>
+            <span className="font-mono font-bold text-emerald-400">
               {totals.kcal} kcal · {totals.protein}p / {totals.carbs}c / {totals.fat}f
             </span>
           </div>
-          <button className="btn-primary w-full" onClick={save} disabled={saving || items.length === 0}>
-            {saving ? "Saving…" : "Save to daily log"}
+
+          <button
+            className="btn-primary w-full !py-3.5 text-base font-bold shadow-xl shadow-emerald-500/25"
+            onClick={save}
+            disabled={saving || items.length === 0}
+          >
+            {saving ? "Saving to daily log…" : "Approve & Save to Daily Log →"}
           </button>
         </div>
       </div>

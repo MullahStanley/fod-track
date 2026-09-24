@@ -62,6 +62,12 @@ const SEED: SeedFood[] = [
   { name: "Chicken Wings, fried", per100g: { kcal: 290, protein: 24, carbs: 3, fat: 21 }, servingGrams: 100 },
   { name: "Sushi Roll, salmon avocado", per100g: { kcal: 145, protein: 6, carbs: 21, fat: 4 }, servingGrams: 170 },
   { name: "Hummus", per100g: { kcal: 166, protein: 8, carbs: 14, fat: 10 }, servingGrams: 30 },
+  { name: "Tuna, canned in water, drained", per100g: { kcal: 116, protein: 26, carbs: 0, fat: 0.8 }, servingGrams: 142 },
+  { name: "Turkey Breast, roasted, skinless", per100g: { kcal: 135, protein: 30, carbs: 0, fat: 0.7 }, servingGrams: 140 },
+  { name: "Cottage Cheese, lowfat 2%", per100g: { kcal: 81, protein: 11, carbs: 4.8, fat: 2.3 }, servingGrams: 113 },
+  { name: "Quinoa, cooked", per100g: { kcal: 120, protein: 4.4, carbs: 21.3, fat: 1.9 }, servingGrams: 185 },
+  { name: "Chia Seeds", per100g: { kcal: 486, protein: 17, carbs: 42, fat: 31 }, servingGrams: 15 },
+  { name: "Honey", per100g: { kcal: 304, protein: 0.3, carbs: 82, fat: 0 }, servingGrams: 21 },
 ];
 
 /**
