@@ -76,37 +76,55 @@ function round1(n: number): number {
   return Math.round(n * 10) / 10;
 }
 
+const USDA_CACHE = new Map<string, FoodSearchResult[]>();
+
 export function hasUsdaKey(): boolean {
   return Boolean(process.env.USDA_FDC_API_KEY);
 }
 
 /**
  * Search USDA FDC. Requires USDA_FDC_API_KEY.
+ * Cached in-memory to prevent rate limits and ensure instant queries.
  * Returns [] on network failure — callers should fall back to the seed DB.
  */
 export async function searchUsdaFoods(
   query: string,
   limit = 10
 ): Promise<FoodSearchResult[]> {
+  const q = query.trim().toLowerCase();
   const key = process.env.USDA_FDC_API_KEY;
-  if (!key || !query.trim()) return [];
+  if (!key || !q) return [];
+
+  const cached = USDA_CACHE.get(q);
+  if (cached) {
+    return cached.slice(0, limit);
+  }
 
   const params = new URLSearchParams({
     api_key: key,
-    query,
+    query: q,
     pageSize: String(limit),
     requireAllWords: "false",
   });
 
   try {
     const res = await fetch(`${FDC_BASE}?${params}`, {
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(6000),
     });
     if (!res.ok) return [];
     const data = (await res.json()) as { foods?: FdcFood[] };
-    return (data.foods ?? [])
+    const items = (data.foods ?? [])
       .map(toResult)
       .filter((r): r is FoodSearchResult => r !== null);
+
+    if (items.length > 0) {
+      if (USDA_CACHE.size >= 200) {
+        const first = USDA_CACHE.keys().next().value;
+        if (first) USDA_CACHE.delete(first);
+      }
+      USDA_CACHE.set(q, items);
+    }
+    return items.slice(0, limit);
   } catch {
     return [];
   }

@@ -110,11 +110,13 @@ export interface FoodItem {
   servingGrams: number | null;
   /** Computed grams for the current quantity */
   grams: number;
-  source: "vision" | "barcode" | "search" | "manual" | "hidden_extra";
-  /** Optional provenance */
+  source: "vision" | "barcode" | "search" | "manual" | "hidden_extra" | "ai";
+  /** Optional provenance & local context */
   fdcId?: number;
   barcode?: string;
   brand?: string;
+  localOrigin?: string;
+  culturalNotes?: string;
 }
 
 export interface LoggedMeal {
@@ -183,7 +185,9 @@ export interface FoodSearchResult {
     fat: number;
   };
   servingGrams: number | null;
-  source: "usda" | "seed" | "openfoodfacts" | "local";
+  source: "usda" | "seed" | "openfoodfacts" | "local" | "ai";
+  localOrigin?: string;
+  culturalNotes?: string;
 }
 
 export interface BarcodeProduct {

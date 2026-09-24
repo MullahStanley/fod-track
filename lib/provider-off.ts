@@ -201,9 +201,9 @@ export async function searchOpenFoodFacts(query: string, limit = 8): Promise<Foo
   try {
     const res = await fetch(url, {
       headers: { "User-Agent": OFF_UA },
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(4000),
     });
-    if (!res.ok) return [];
+    if (!res.ok || !res.headers.get("content-type")?.includes("json")) return [];
     const data = (await res.json()) as OffSearchResponse;
 
     const out: FoodSearchResult[] = [];

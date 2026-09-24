@@ -11,7 +11,15 @@
  */
 import type { VisionMealAnalysis } from "./types";
 
-const VISION_MODEL = process.env.GEMINI_VISION_MODEL || "gemini-2.5-flash";
+function getVisionModel(): string {
+  const m = process.env.GEMINI_VISION_MODEL;
+  if (!m || m === "gemini-3-flash" || m === "gemini-2.5-flash") {
+    return "gemini-3.6-flash";
+  }
+  return m;
+}
+
+const VISION_MODEL = getVisionModel();
 
 const SYSTEM_PROMPT = `You are a nutritional vision analyst. Analyze the meal photo and respond ONLY with JSON matching this exact schema:
 

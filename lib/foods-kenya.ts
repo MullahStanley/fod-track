@@ -139,6 +139,20 @@ const KENYA_FOODS: LocalFood[] = [
   { name: "White Cap Lager Beer", aka: ["white", "cap", "beer"], kcal: 40, protein: 0.3, carbs: 2.8, fat: 0, servingGrams: 500 },
   { name: "Cooking oil, added", aka: ["oil", "cooking", "fat"], kcal: 884, protein: 0, carbs: 0, fat: 100, servingGrams: 14 },
   { name: "Blue Band Margarine", aka: ["blue", "band", "margarine"], kcal: 720, protein: 0, carbs: 0.5, fat: 80, servingGrams: 10 },
+
+  // Traditional Regional Dishes & Local Language Staples
+  { name: "Mursik (Fermented Kalenjin milk)", aka: ["mursik", "fermented", "milk"], kcal: 65, protein: 3.3, carbs: 4.5, fat: 3.6, servingGrams: 250 },
+  { name: "Kamande stew (Yellow lentils)", aka: ["kamande", "lentils", "dal"], kcal: 116, protein: 9, carbs: 20, fat: 0.4, servingGrams: 200 },
+  { name: "Terere (Cooked amaranth greens)", aka: ["terere", "amaranth", "mchicha"], kcal: 23, protein: 2.1, carbs: 4, fat: 0.3, servingGrams: 150 },
+  { name: "Mrenda (Jute mallow traditional greens)", aka: ["mrenda", "mallow"], kcal: 34, protein: 3.5, carbs: 5.8, fat: 0.2, servingGrams: 150 },
+  { name: "Kunde na maziwa (Cowpea leaves with milk)", aka: ["kunde", "seveve", "cowpea"], kcal: 48, protein: 3.8, carbs: 6.2, fat: 1.5, servingGrams: 180 },
+  { name: "Aliadho (Luo smoked beef stew)", aka: ["aliadho", "smoked", "beef"], kcal: 195, protein: 26, carbs: 2, fat: 9, servingGrams: 200 },
+  { name: "Kuon Anang'a (Luo soft millet/sorghum ugali)", aka: ["kuon", "ananga", "ugali"], kcal: 125, protein: 3.2, carbs: 26, fat: 0.8, servingGrams: 250 },
+  { name: "Ingokho (Luhya traditional chicken stew)", aka: ["ingokho", "chicken", "kuku"], kcal: 180, protein: 24, carbs: 3, fat: 8, servingGrams: 220 },
+  { name: "Mukimo ya Njahi (Black beans & mashed bananas)", aka: ["njahi", "mukimo"], kcal: 145, protein: 6.5, carbs: 26, fat: 2.2, servingGrams: 250 },
+  { name: "Kaimati (Coastal sweet dumplings)", aka: ["kaimati", "dumplings"], kcal: 310, protein: 4.5, carbs: 62, fat: 6, servingGrams: 100 },
+  { name: "Vibibi (Coastal coconut rice pancakes)", aka: ["vibibi", "pancakes"], kcal: 220, protein: 3.8, carbs: 42, fat: 5.2, servingGrams: 120 },
+  { name: "Viazi Karai (Spiced battered potatoes)", aka: ["viazi", "karai"], kcal: 165, protein: 2.8, carbs: 30, fat: 4.5, servingGrams: 150 },
 ];
 
 function toResult(food: LocalFood): FoodSearchResult {

@@ -32,6 +32,7 @@ const SOURCE_BADGES: Record<FoodItem["source"], string> = {
   search: "🔍 Database",
   manual: "✍️ Manual",
   hidden_extra: "🧈 Extra",
+  ai: "✨ AI Resolved",
 };
 
 export default function ReviewPage() {
@@ -48,10 +49,52 @@ export default function ReviewPage() {
   const [searching, setSearching] = useState(false);
   const [showExtras, setShowExtras] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [resolvingAi, setResolvingAi] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const items = scan?.items ?? [];
   const totals = useMemo(() => itemsTotals(items), [items]);
+
+  async function resolveUnresolvedWithAi(targetName: string) {
+    if (!scan) return;
+    setResolvingAi(targetName);
+    setError(null);
+    try {
+      const existing = scan.items.find(
+        (i) => i.name.toLowerCase() === targetName.toLowerCase()
+      );
+      const grams = existing ? existing.grams : 100;
+      const res = await apiJson<{ item: FoodItem }>("/api/foods/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "resolve_ai", name: targetName, grams }),
+      });
+
+      if (res.item && res.item.per100g.kcal > 0) {
+        const nextItems = scan.items.map((i) =>
+          i.name.toLowerCase() === targetName.toLowerCase()
+            ? { ...res.item, id: i.id }
+            : i
+        );
+        const nextUnresolved = scan.unresolvedNames.filter(
+          (u) => u.toLowerCase() !== targetName.toLowerCase()
+        );
+        const nextScan: ResolvedScan = {
+          ...scan,
+          items: nextItems,
+          unresolvedNames: nextUnresolved,
+        };
+        setScan(nextScan);
+        sessionStorage.setItem("fodtrack_scan", JSON.stringify(nextScan));
+      } else {
+        setError(`AI could not determine nutrition for "${targetName}". Please search database manually.`);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "AI resolution failed");
+    } finally {
+      setResolvingAi(null);
+    }
+  }
 
   if (!scan) {
     return (
@@ -213,9 +256,29 @@ export default function ReviewPage() {
       )}
 
       {scan.unresolvedNames.length > 0 && (
-        <div className="mb-4 rounded-xl border border-line bg-surface-raised/80 p-3 text-xs text-muted backdrop-blur-md">
-          Couldn&apos;t match: {scan.unresolvedNames.join(", ")} — default macros are 0.
-          Adjust grams or use the search below to replace with a verified entry.
+        <div className="mb-4 rounded-xl border border-purple-500/30 bg-purple-500/10 p-3.5 text-xs text-ink backdrop-blur-md">
+          <div className="flex items-center gap-1.5 font-bold text-purple-300">
+            <span>✨</span>
+            <span>Unmatched local components in buffer:</span>
+          </div>
+          <p className="mt-1 text-muted text-[11px] leading-relaxed">
+            {scan.unresolvedNames.join(", ")} — default macros are 0.
+            Our AI Food Assistant can interpret local language names, Sheng, and traditional Kenyan dishes:
+          </p>
+          <div className="mt-2.5 flex flex-wrap gap-2">
+            {scan.unresolvedNames.map((name) => (
+              <button
+                key={name}
+                type="button"
+                onClick={() => void resolveUnresolvedWithAi(name)}
+                disabled={resolvingAi === name}
+                className="chip !border-purple-500/40 text-purple-300 hover:bg-purple-500/20 font-bold !text-[11px] flex items-center gap-1"
+              >
+                {resolvingAi === name ? <Spinner className="h-3 w-3 border-purple-400" /> : "✨ "}
+                Calculate nutrition for &ldquo;{name}&rdquo; with AI
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -333,6 +396,16 @@ export default function ReviewPage() {
                     <p className="truncate text-sm font-bold text-ink">{item.name}</p>
                   </div>
                   {item.brand && <p className="text-xs text-muted mt-0.5">{item.brand}</p>}
+                  {item.localOrigin && (
+                    <span className="inline-block chip !py-0 !px-1.5 !text-[10px] !border-purple-500/30 text-purple-300 mt-1">
+                      📍 {item.localOrigin}
+                    </span>
+                  )}
+                  {item.culturalNotes && (
+                    <p className="text-[11px] text-muted italic mt-0.5 line-clamp-1">
+                      {item.culturalNotes}
+                    </p>
+                  )}
                   <p className="mt-1 font-mono text-xs text-muted">
                     <span className="font-bold text-emerald-400">{m.kcal} kcal</span> · {m.protein}p {m.carbs}c {m.fat}f
                   </p>

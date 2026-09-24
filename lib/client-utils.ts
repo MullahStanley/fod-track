@@ -65,9 +65,11 @@ export interface FoodItem {
   servingMultiplier: number;
   servingGrams: number | null;
   grams: number;
-  source: "vision" | "barcode" | "search" | "manual" | "hidden_extra";
+  source: "vision" | "barcode" | "search" | "manual" | "hidden_extra" | "ai";
   fdcId?: number;
   barcode?: string;
+  localOrigin?: string;
+  culturalNotes?: string;
 }
 
 export interface Profile {
@@ -121,7 +123,9 @@ export interface FoodSearchResult {
   brand?: string;
   per100g: { kcal: number; protein: number; carbs: number; fat: number };
   servingGrams: number | null;
-  source: "usda" | "seed" | "openfoodfacts" | "local";
+  source: "usda" | "seed" | "openfoodfacts" | "local" | "ai";
+  localOrigin?: string;
+  culturalNotes?: string;
 }
 
 export interface ResolvedScan {
