@@ -46,7 +46,7 @@ export function MacroBar({
         </div>
       </div>
 
-      <div className="h-2.5 overflow-hidden rounded-full bg-surface-overlay/80 border border-white/5 p-0.5">
+      <div className="h-2.5 overflow-hidden rounded-full bg-surface-overlay/80 border border-line/40 p-0.5">
         <div
           className="h-full rounded-full transition-all duration-500 ease-out"
           style={{
@@ -91,7 +91,7 @@ export function CalorieProgressRing({
           fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="text-white/10"
+          className="text-line opacity-40"
         />
 
         {/* Gradient definition */}
@@ -206,7 +206,7 @@ export function Spinner({ className = "" }: { className?: string }) {
 export function EmptyState({ title, hint, action }: { title: string; hint?: string; action?: ReactNode }) {
   return (
     <div className="card text-center py-8">
-      <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-xl">
+      <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-surface border border-line text-xl">
         🍽️
       </div>
       <p className="text-sm font-semibold text-ink">{title}</p>
@@ -229,27 +229,27 @@ export function WaterTracker({
   const pct = Math.min(100, Math.round((intakeMl / targetMl) * 100));
 
   return (
-    <div className="card bg-surface-raised/80 border-cyan-500/20 backdrop-blur-xl">
+    <div className="card border-cyan-500/30">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-500/20 text-cyan-300 text-base">
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-500/20 text-cyan-500 dark:text-cyan-300 text-base">
             💧
           </span>
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-ink">
               Daily Water Hydration
             </h3>
-            <p className="font-mono text-sm font-bold text-cyan-400">
+            <p className="font-mono text-sm font-bold text-cyan-600 dark:text-cyan-400">
               {intakeMl} <span className="text-xs font-normal text-muted">/ {targetMl} ml</span>
             </p>
           </div>
         </div>
-        <span className="chip !text-[11px] !border-cyan-500/30 !text-cyan-300">
+        <span className="chip !text-[11px] !border-cyan-500/30 text-cyan-600 dark:text-cyan-300 font-semibold">
           {pct}%
         </span>
       </div>
 
-      <div className="mt-3 h-2 overflow-hidden rounded-full bg-cyan-950/40 border border-cyan-500/20">
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-overlay border border-cyan-500/20">
         <div
           className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-300"
           style={{ width: `${pct}%`, boxShadow: "0 0 8px rgba(6, 182, 212, 0.4)" }}

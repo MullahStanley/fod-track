@@ -96,6 +96,14 @@ export default function BarcodePage() {
 
   return (
     <main className="relative z-10 mx-auto w-full max-w-2xl px-4 pb-28 pt-6 sm:px-6">
+      <nav aria-label="Breadcrumb" className="mb-3 flex items-center gap-1.5 text-xs text-muted">
+        <Link href="/" className="hover:text-ink">Home</Link>
+        <span>/</span>
+        <Link href="/dashboard" className="hover:text-ink">Dashboard</Link>
+        <span>/</span>
+        <span className="text-ink font-medium">Barcode Scanner</span>
+      </nav>
+
       <header className="mb-6 flex items-center justify-between">
         <Link href="/dashboard" className="chip backdrop-blur-md">
           ← Dashboard
@@ -129,7 +137,7 @@ export default function BarcodePage() {
               📷
             </span>
             <div className="text-left">
-              <div className="font-bold text-slate-100">Open Camera Barcode Scanner</div>
+              <div className="font-bold text-ink">Open Camera Barcode Scanner</div>
               <div className="text-xs font-normal text-emerald-400/80">
                 Live viewfinder, autofocus reticle & photo upload
               </div>
@@ -139,7 +147,7 @@ export default function BarcodePage() {
       )}
 
       {/* Manual Input Section */}
-      <section className="card mb-4 backdrop-blur-xl bg-surface-raised/80 border-white/10 shadow-xl">
+      <section className="card mb-4 backdrop-blur-xl bg-surface-raised/80 border-line shadow-xl">
         <label className="label" htmlFor="code">
           Manual UPC / EAN entry
         </label>
@@ -188,7 +196,7 @@ export default function BarcodePage() {
       {error && (
         <div className="mb-4 rounded-xl border border-bad/40 bg-bad/10 p-3.5 text-xs text-bad backdrop-blur-md flex items-center justify-between gap-3">
           <span>{error}</span>
-          <Link href="/dashboard/search" className="underline whitespace-nowrap font-medium text-slate-200 hover:text-white">
+          <Link href="/dashboard/search" className="underline whitespace-nowrap font-medium text-ink hover:text-emerald-400">
             Search manually →
           </Link>
         </div>
@@ -196,7 +204,7 @@ export default function BarcodePage() {
 
       {/* Product Card */}
       {product && scaled && (
-        <section className="card backdrop-blur-xl bg-surface-raised/85 border-white/15 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <section className="card backdrop-blur-xl bg-surface-raised/85 border-line shadow-2xl animate-in fade-in zoom-in-95 duration-200">
           <SectionTitle right={<span className="chip !text-[11px]">{product.brand ?? "Generic"}</span>}>
             Matched Product
           </SectionTitle>

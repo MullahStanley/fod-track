@@ -144,6 +144,14 @@ export default function ScanPage() {
 
   return (
     <main className="relative z-10 mx-auto w-full max-w-2xl px-4 pb-28 pt-6 sm:px-6">
+      <nav aria-label="Breadcrumb" className="mb-3 flex items-center gap-1.5 text-xs text-muted">
+        <Link href="/" className="hover:text-ink">Home</Link>
+        <span>/</span>
+        <Link href="/dashboard" className="hover:text-ink">Dashboard</Link>
+        <span>/</span>
+        <span className="text-ink font-medium">AI Meal Scanner</span>
+      </nav>
+
       <header className="mb-6 flex items-center justify-between">
         <Link href="/dashboard" className="chip backdrop-blur-md">
           ← Dashboard
@@ -158,7 +166,7 @@ export default function ScanPage() {
       </header>
 
       {/* Upload & Camera Dropzone */}
-      <section className="card border-white/15 bg-surface-raised/85 shadow-2xl backdrop-blur-xl">
+      <section className="card border-line bg-surface-raised/85 shadow-2xl backdrop-blur-xl">
         <input
           ref={inputRef}
           type="file"
@@ -172,7 +180,7 @@ export default function ScanPage() {
         />
 
         {previewUrl ? (
-          <div className="relative mb-4 overflow-hidden rounded-xl border border-white/10">
+          <div className="relative mb-4 overflow-hidden rounded-xl border border-line">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={previewUrl}
@@ -243,10 +251,10 @@ export default function ScanPage() {
             <p className="font-semibold mb-1">Scanning notice</p>
             <p>{error}</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Link href="/dashboard/barcode" className="chip !border-white/20">
+              <Link href="/dashboard/barcode" className="chip !border-line">
                 🏷️ Try Barcode Scanner
               </Link>
-              <Link href="/dashboard/search" className="chip !border-white/20">
+              <Link href="/dashboard/search" className="chip !border-line">
                 🔍 Manual Food Search
               </Link>
             </div>
@@ -266,7 +274,7 @@ export default function ScanPage() {
                 className="chip w-full !justify-start !py-2 text-xs hover:border-emerald-400 hover:text-emerald-300 transition text-left"
                 onClick={() => loadDemoMeal(demo)}
               >
-                🍽️ <span className="font-medium text-slate-200">{demo.label}</span>
+                🍽️ <span className="font-medium text-ink">{demo.label}</span>
               </button>
             ))}
           </div>
@@ -274,7 +282,7 @@ export default function ScanPage() {
       </section>
 
       {/* Info card */}
-      <section className="card mt-4 text-xs text-muted border-white/10 bg-surface-raised/70">
+      <section className="card mt-4 text-xs text-muted border-line bg-surface-raised/70">
         <p className="mb-1 font-bold text-ink">Strict Zero-Calorie-Guessing Policy</p>
         <p>
           Unlike generic apps that guess raw calories from pictures, fod-track

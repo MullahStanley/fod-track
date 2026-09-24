@@ -235,16 +235,16 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-slate-950/90 shadow-2xl backdrop-blur-xl">
+    <div className="relative overflow-hidden rounded-2xl border border-line bg-surface-raised/95 shadow-2xl backdrop-blur-xl">
       {/* Top control bar */}
-      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 bg-white/[0.02]">
+      <div className="flex items-center justify-between border-b border-line px-4 py-3 bg-surface-overlay/60">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2.5 w-2.5">
             <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${isRunning ? "bg-emerald-400" : "bg-amber-400"}`} />
             <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${isRunning ? "bg-emerald-500" : "bg-amber-500"}`} />
           </span>
-          <span className="text-xs font-semibold tracking-wider text-slate-200 uppercase">
-            {isRunning ? "Live Scanner" : "Camera Initializing"}
+          <span className="text-xs font-semibold tracking-wider text-ink uppercase">
+            {isRunning ? "Live Scanner Active" : "Initializing Camera"}
           </span>
         </div>
 
@@ -254,7 +254,7 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
               type="button"
               onClick={toggleTorch}
               className={`rounded-lg px-2.5 py-1 text-xs font-medium transition ${
-                torchOn ? "bg-amber-400 text-slate-950 font-bold" : "bg-white/10 text-slate-300 hover:bg-white/20"
+                torchOn ? "bg-amber-400 text-slate-950 font-bold" : "chip"
               }`}
               title="Toggle flashlight"
             >
@@ -266,7 +266,7 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
             <button
               type="button"
               onClick={switchCamera}
-              className="rounded-lg bg-white/10 px-2.5 py-1 text-xs font-medium text-slate-300 transition hover:bg-white/20"
+              className="chip"
               title="Switch camera"
             >
               🔄 Flip
@@ -280,7 +280,7 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
                 void stopScanner();
                 onClose();
               }}
-              className="rounded-lg bg-white/10 px-2.5 py-1 text-xs font-medium text-slate-300 transition hover:bg-red-500/20 hover:text-red-300"
+              className="chip hover:!border-bad/60 hover:text-bad"
             >
               ✕ Close
             </button>
@@ -297,7 +297,7 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
         {isRunning && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
             {/* Guide box */}
-            <div className="relative h-44 w-72 rounded-xl border border-white/20 bg-emerald-500/5 shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]">
+            <div className="relative h-44 w-72 rounded-xl border border-emerald-500/30 bg-emerald-500/5 shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]">
               {/* Corner brackets */}
               <div className="absolute -top-1 -left-1 h-5 w-5 rounded-tl-lg border-t-2 border-l-2 border-emerald-400" />
               <div className="absolute -top-1 -right-1 h-5 w-5 rounded-tr-lg border-t-2 border-r-2 border-emerald-400" />
@@ -318,30 +318,30 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
 
         {/* Loading state */}
         {isStarting && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-950/80 backdrop-blur-sm">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-surface-raised/90 backdrop-blur-sm">
             <Spinner className="h-6 w-6 border-emerald-400" />
-            <p className="text-xs text-slate-300">Opening camera…</p>
+            <p className="text-xs text-ink font-medium">Opening camera…</p>
           </div>
         )}
 
         {/* Photo file processing state */}
         {isFileScanning && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-950/90 backdrop-blur-sm">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-surface-raised/90 backdrop-blur-sm">
             <Spinner className="h-6 w-6 border-emerald-400" />
-            <p className="text-xs text-slate-300">Reading barcode from image…</p>
+            <p className="text-xs text-ink font-medium">Reading barcode from image…</p>
           </div>
         )}
       </div>
 
       {/* Error display */}
       {errorMessage && (
-        <div className="border-t border-red-500/20 bg-red-950/30 px-4 py-2.5 text-xs text-red-300">
+        <div className="border-t border-bad/30 bg-bad/10 px-4 py-2.5 text-xs text-bad">
           ⚠️ {errorMessage}
         </div>
       )}
 
       {/* Bottom actions: Photo upload & camera reload */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/10 bg-white/[0.02] p-3 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line bg-surface-overlay/50 p-3 text-xs">
         <input
           ref={fileInputRef}
           type="file"
@@ -353,7 +353,7 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-medium text-slate-200 transition hover:bg-white/10 active:scale-[0.98]"
+          className="chip hover:!border-emerald-500/60 font-medium"
         >
           🖼️ Scan from photo / gallery
         </button>
@@ -362,7 +362,7 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
           <button
             type="button"
             onClick={() => startScanner({ facingMode: "environment" })}
-            className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/20 px-3 py-1.5 font-medium text-emerald-300 hover:bg-emerald-500/30"
+            className="chip !border-emerald-500/40 !bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 font-semibold"
           >
             🔄 Restart camera
           </button>

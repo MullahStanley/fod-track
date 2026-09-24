@@ -117,21 +117,34 @@ export default function DashboardPage() {
   return (
     <main className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-28 pt-6 sm:px-6">
       {/* Top Header */}
-      <header className="mb-6 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-400 font-black text-slate-950 shadow-md shadow-emerald-500/30">
-            F
-          </span>
-          <span className="text-sm font-extrabold tracking-widest text-ink">
-            fod-track
-          </span>
-        </Link>
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <nav aria-label="Breadcrumb" className="mb-1 flex items-center gap-1.5 text-xs text-muted">
+            <Link href="/" className="hover:text-ink">Home</Link>
+            <span>/</span>
+            <span className="text-ink font-medium">Dashboard</span>
+          </nav>
+          <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2" title="fod-track home">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-400 font-black text-slate-950 shadow-md shadow-emerald-500/30">
+                F
+              </span>
+              <span className="text-sm font-extrabold tracking-widest text-ink">
+                fod-track
+              </span>
+            </Link>
+            <h1 className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-muted ml-1.5 sm:ml-2 border-l border-line pl-1.5 sm:pl-2 inline-block">
+              Daily Nutrition Dashboard
+            </h1>
+          </div>
+        </div>
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <Link
             href="/dashboard/profile"
-            className="chip !border-white/10 hover:!border-emerald-400/50 transition font-medium"
+            className="chip hover:!border-emerald-500/50 transition font-medium"
+            title="View personal profile and metabolic targets"
           >
             {profile?.name ? profile.name : "Profile"} ⚙︎
           </Link>
@@ -141,7 +154,7 @@ export default function DashboardPage() {
       <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
         {/* Left Column: Daily Target Summary & Quick Actions */}
         <aside className="space-y-4">
-          <section className="card border-white/15 bg-surface-raised/85 shadow-2xl backdrop-blur-xl">
+          <section className="card shadow-2xl backdrop-blur-xl">
             {/* Day Switcher */}
             <div className="flex items-center justify-between border-b border-line/60 pb-3">
               <button
@@ -218,7 +231,7 @@ export default function DashboardPage() {
           />
 
           {/* Quick Actions Card */}
-          <section className="card border-white/10 bg-surface-raised/80">
+          <section className="card">
             <SectionTitle>Quick actions</SectionTitle>
             <div className="grid grid-cols-2 gap-2">
               <Link
@@ -443,7 +456,7 @@ function MealCard({ meal, onDeleted }: { meal: LoggedMeal; onDeleted: () => void
   };
 
   return (
-    <li className="card border-white/10 hover:border-white/20 transition-all flex flex-col justify-between">
+    <li className="card flex flex-col justify-between">
       <div>
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
@@ -458,7 +471,7 @@ function MealCard({ meal, onDeleted }: { meal: LoggedMeal; onDeleted: () => void
           </div>
 
           <div className="text-right">
-            <p className="font-mono text-base font-extrabold text-emerald-400">
+            <p className="font-mono text-base font-extrabold text-emerald-600 dark:text-emerald-400">
               {meal.totals.kcal} <span className="text-xs text-muted font-normal">kcal</span>
             </p>
           </div>
@@ -466,13 +479,13 @@ function MealCard({ meal, onDeleted }: { meal: LoggedMeal; onDeleted: () => void
 
         {/* Macro Pill Indicators */}
         <div className="mt-3 flex flex-wrap gap-1.5 text-[11px]">
-          <span className="chip !text-[10px] !border-cyan-500/20 text-cyan-300">
+          <span className="chip !text-[10px] !border-cyan-500/20 text-cyan-600 dark:text-cyan-300 font-semibold">
             {meal.totals.protein}g P
           </span>
-          <span className="chip !text-[10px] !border-amber-500/20 text-amber-300">
+          <span className="chip !text-[10px] !border-amber-500/20 text-amber-600 dark:text-amber-300 font-semibold">
             {meal.totals.carbs}g C
           </span>
-          <span className="chip !text-[10px] !border-rose-500/20 text-rose-300">
+          <span className="chip !text-[10px] !border-rose-500/20 text-rose-600 dark:text-rose-300 font-semibold">
             {meal.totals.fat}g F
           </span>
         </div>
@@ -481,8 +494,8 @@ function MealCard({ meal, onDeleted }: { meal: LoggedMeal; onDeleted: () => void
         {expanded && (
           <div className="mt-3 space-y-1.5 border-t border-line/60 pt-2.5">
             {meal.items.map((it, idx) => (
-              <div key={idx} className="flex items-center justify-between text-xs text-slate-300">
-                <span className="truncate pr-2">{it.name} ({it.grams}g)</span>
+              <div key={idx} className="flex items-center justify-between text-xs text-ink">
+                <span className="truncate pr-2 font-medium">{it.name} ({it.grams}g)</span>
                 <span className="font-mono text-[11px] text-muted shrink-0">
                   {Math.round((it.per100g.kcal * it.grams) / 100)} kcal
                 </span>
@@ -588,8 +601,8 @@ function QuickAddModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="card w-full max-w-md border-white/20 bg-slate-950/90 shadow-2xl p-6">
-        <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
+      <div className="card w-full max-w-md border-line bg-surface-raised shadow-2xl p-6">
+        <div className="flex items-center justify-between mb-4 border-b border-line pb-3">
           <h2 className="text-base font-bold text-ink flex items-center gap-2">
             <span>⚡</span> Quick Add Calories & Macros
           </h2>
@@ -714,25 +727,25 @@ function QuickAddModal({
 
 function TabBar() {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-slate-950/85 backdrop-blur-xl sm:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface-raised/95 backdrop-blur-xl sm:hidden">
       <div className="mx-auto grid max-w-md grid-cols-5 text-center text-[10px] py-1">
         <Link href="/dashboard" className="flex flex-col items-center py-1 text-emerald-400 font-bold">
           <span className="text-base">🏠</span>
           <span>Today</span>
         </Link>
-        <Link href="/dashboard/scan" className="flex flex-col items-center py-1 text-muted hover:text-slate-200">
+        <Link href="/dashboard/scan" className="flex flex-col items-center py-1 text-muted hover:text-ink">
           <span className="text-base">📸</span>
           <span>AI Scan</span>
         </Link>
-        <Link href="/dashboard/barcode" className="flex flex-col items-center py-1 text-muted hover:text-slate-200">
+        <Link href="/dashboard/barcode" className="flex flex-col items-center py-1 text-muted hover:text-ink">
           <span className="text-base">🏷️</span>
           <span>Barcode</span>
         </Link>
-        <Link href="/dashboard/search" className="flex flex-col items-center py-1 text-muted hover:text-slate-200">
+        <Link href="/dashboard/search" className="flex flex-col items-center py-1 text-muted hover:text-ink">
           <span className="text-base">🔍</span>
           <span>Search</span>
         </Link>
-        <Link href="/dashboard/profile" className="flex flex-col items-center py-1 text-muted hover:text-slate-200">
+        <Link href="/dashboard/profile" className="flex flex-col items-center py-1 text-muted hover:text-ink">
           <span className="text-base">🎯</span>
           <span>Goals</span>
         </Link>

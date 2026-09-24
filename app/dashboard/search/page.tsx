@@ -95,6 +95,14 @@ export default function SearchPage() {
 
   return (
     <main className="relative z-10 mx-auto w-full max-w-3xl px-4 pb-28 pt-6 sm:px-6">
+      <nav aria-label="Breadcrumb" className="mb-3 flex items-center gap-1.5 text-xs text-muted">
+        <Link href="/" className="hover:text-ink">Home</Link>
+        <span>/</span>
+        <Link href="/dashboard" className="hover:text-ink">Dashboard</Link>
+        <span>/</span>
+        <span className="text-ink font-medium">Food Database</span>
+      </nav>
+
       <header className="mb-6 flex items-center justify-between">
         <Link href="/dashboard" className="chip backdrop-blur-md">
           ← Dashboard
@@ -109,7 +117,7 @@ export default function SearchPage() {
       </header>
 
       {/* Search Input Card */}
-      <section className="card mb-4 border-white/10 bg-surface-raised/85 shadow-2xl backdrop-blur-xl">
+      <section className="card mb-4 border-line bg-surface-raised/85 shadow-2xl backdrop-blur-xl">
         <div className="relative flex gap-2">
           <input
             className="input !py-3 !text-base"
@@ -167,7 +175,7 @@ export default function SearchPage() {
       {/* Empty State when no results */}
       {searched && results.length === 0 && !busy && (
         <div className="card text-center py-10">
-          <p className="text-sm font-semibold text-slate-200">No foods matched &ldquo;{q}&rdquo;</p>
+          <p className="text-sm font-semibold text-ink">No foods matched &ldquo;{q}&rdquo;</p>
           <p className="mt-1 text-xs text-muted">
             Try a broader word like &ldquo;choma&rdquo;, &ldquo;ugali&rdquo;, &ldquo;rice&rdquo;, or &ldquo;egg&rdquo;.
           </p>
@@ -191,7 +199,7 @@ export default function SearchPage() {
             {results.map((r, i) => (
               <li
                 key={`${r.fdcId ?? r.barcode ?? r.source}-${r.name}-${i}`}
-                className="card border-white/10 hover:border-emerald-400/30 transition-all flex flex-col justify-between"
+                className="card border-line hover:border-emerald-400/30 transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2">

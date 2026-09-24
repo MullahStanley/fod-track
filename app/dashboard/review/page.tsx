@@ -56,8 +56,8 @@ export default function ReviewPage() {
   if (!scan) {
     return (
       <main className="relative z-10 mx-auto max-w-md px-4 pb-24 pt-20 text-center">
-        <div className="card border-white/10 bg-surface-raised/85 shadow-2xl backdrop-blur-xl py-10">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-xl">
+        <div className="card border-line bg-surface-raised/85 shadow-2xl backdrop-blur-xl py-10">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-surface border border-line text-xl">
             🍽️
           </div>
           <h2 className="text-base font-bold text-ink mb-1">No Meal in Calibration Buffer</h2>
@@ -178,6 +178,14 @@ export default function ReviewPage() {
 
   return (
     <main className="relative z-10 mx-auto w-full max-w-2xl px-4 pb-44 pt-6 sm:px-6">
+      <nav aria-label="Breadcrumb" className="mb-3 flex items-center gap-1.5 text-xs text-muted">
+        <Link href="/" className="hover:text-ink">Home</Link>
+        <span>/</span>
+        <Link href="/dashboard" className="hover:text-ink">Dashboard</Link>
+        <span>/</span>
+        <span className="text-ink font-medium">Plate Calibration</span>
+      </nav>
+
       <header className="mb-6 flex items-center justify-between">
         <Link href="/dashboard" className="chip backdrop-blur-md">
           ← Cancel
@@ -197,7 +205,7 @@ export default function ReviewPage() {
           <span className="text-base">⚠️</span>
           <div>
             <span className="font-bold">Hidden oils/fats flagged by AI vision.</span>
-            <p className="mt-0.5 text-slate-300">
+            <p className="mt-0.5 text-ink/80">
               Check the cooking oils or dressing items below and adjust their grams if needed.
             </p>
           </div>
@@ -212,7 +220,7 @@ export default function ReviewPage() {
       )}
 
       {/* Totals Summary Card */}
-      <section className="card mb-4 border-white/15 bg-surface-raised/85 shadow-2xl backdrop-blur-xl">
+      <section className="card mb-4 border-line bg-surface-raised/85 shadow-2xl backdrop-blur-xl">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 text-center">
           <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-2.5">
             <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
@@ -263,7 +271,7 @@ export default function ReviewPage() {
       </section>
 
       {/* Meal Metadata */}
-      <section className="card mb-4 grid gap-3 sm:grid-cols-2 border-white/10 bg-surface-raised/80">
+      <section className="card mb-4 grid gap-3 sm:grid-cols-2 border-line bg-surface-raised/80">
         <div>
           <label className="label" htmlFor="mealName">
             Meal name
@@ -286,7 +294,7 @@ export default function ReviewPage() {
                 className={`chip !justify-center !px-1 capitalize !text-[11px] ${
                   mealType === t
                     ? "!border-emerald-400 !bg-emerald-500/20 !text-emerald-300 font-bold"
-                    : "hover:border-white/20"
+                    : "hover:border-line"
                 }`}
                 onClick={() => setMealType(t)}
               >
@@ -314,7 +322,7 @@ export default function ReviewPage() {
           return (
             <li
               key={item.id}
-              className="card border-white/10 hover:border-white/20 transition-all bg-surface-raised/85"
+              className="card border-line hover:border-emerald-500/30 transition-all bg-surface-raised/85"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
@@ -371,7 +379,7 @@ export default function ReviewPage() {
       </ul>
 
       {/* Hidden Fats & Extras Tray */}
-      <section className="card mb-4 border-white/10 bg-surface-raised/80">
+      <section className="card mb-4 border-line bg-surface-raised/80">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-muted">
@@ -405,7 +413,7 @@ export default function ReviewPage() {
       </section>
 
       {/* Add Missing Items via Search */}
-      <section className="card mb-4 border-white/10 bg-surface-raised/80">
+      <section className="card mb-4 border-line bg-surface-raised/80">
         <SectionTitle>Add extra ingredient from database</SectionTitle>
         <div className="flex gap-2">
           <input
@@ -450,7 +458,7 @@ export default function ReviewPage() {
       </section>
 
       {/* Floating Save Footer */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-slate-950/90 p-4 backdrop-blur-xl">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface-raised/95 p-4 backdrop-blur-xl">
         <div className="mx-auto max-w-2xl">
           <div className="mb-2 flex items-baseline justify-between text-sm">
             <span className="text-xs font-semibold uppercase text-muted tracking-wider">

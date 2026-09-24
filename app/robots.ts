@@ -5,8 +5,16 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/dashboard"],
-        disallow: ["/api/"],
+        allow: [
+          "/",
+          "/how-it-works",
+          "/dashboard",
+          "/dashboard/search",
+          "/dashboard/barcode",
+          "/dashboard/scan",
+          "/dashboard/profile",
+        ],
+        disallow: ["/api/", "/dashboard/review"],
       },
     ],
     sitemap: "https://fod-track.app/sitemap.xml",

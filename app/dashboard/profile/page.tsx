@@ -102,6 +102,14 @@ export default function ProfilePage() {
 
   return (
     <main className="relative z-10 mx-auto w-full max-w-4xl px-4 pb-28 pt-6 sm:px-6">
+      <nav aria-label="Breadcrumb" className="mb-3 flex items-center gap-1.5 text-xs text-muted">
+        <Link href="/" className="hover:text-ink">Home</Link>
+        <span>/</span>
+        <Link href="/dashboard" className="hover:text-ink">Dashboard</Link>
+        <span>/</span>
+        <span className="text-ink font-medium">Metabolic Profile</span>
+      </nav>
+
       <header className="mb-6 flex items-center justify-between">
         <Link href="/dashboard" className="chip backdrop-blur-md">
           ← Dashboard
@@ -117,7 +125,7 @@ export default function ProfilePage() {
 
       {/* Target Results Top Summary Bar */}
       {targets && (
-        <section className="card mb-6 border-white/15 bg-surface-raised/85 shadow-2xl backdrop-blur-xl">
+        <section className="card mb-6 border-line bg-surface-raised/85 shadow-2xl backdrop-blur-xl">
           <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-line/50 pb-3">
             <div>
               <h2 className="text-base font-bold text-ink">Daily Nutrition Targets</h2>
@@ -196,7 +204,7 @@ export default function ProfilePage() {
       {/* Form Grid */}
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Section 1: Body Metrics */}
-        <section className="card space-y-4 border-white/10 bg-surface-raised/80">
+        <section className="card space-y-4 border-line bg-surface-raised/80">
           <SectionTitle>Body & Metrics</SectionTitle>
 
           <div>
@@ -336,7 +344,7 @@ export default function ProfilePage() {
         </section>
 
         {/* Section 2: Activity Multiplier */}
-        <section className="card space-y-4 border-white/10 bg-surface-raised/80">
+        <section className="card space-y-4 border-line bg-surface-raised/80">
           <SectionTitle>Daily Activity Level</SectionTitle>
           <div className="space-y-2">
             {ACTIVITY_OPTIONS.map((a) => (
@@ -346,7 +354,7 @@ export default function ProfilePage() {
                 className={`btn-ghost w-full !justify-between !text-left !p-3 transition ${
                   form.activity === a.value
                     ? "!border-emerald-400 !bg-emerald-500/15 text-emerald-300 font-semibold"
-                    : "hover:border-white/20"
+                    : "hover:border-line"
                 }`}
                 onClick={() => set("activity", a.value)}
               >
@@ -361,7 +369,7 @@ export default function ProfilePage() {
         </section>
 
         {/* Section 3: Goal Selection */}
-        <section className="card space-y-4 border-white/10 bg-surface-raised/80">
+        <section className="card space-y-4 border-line bg-surface-raised/80">
           <SectionTitle>Weight Goal</SectionTitle>
           <div className="space-y-2">
             {GOAL_OPTIONS.map((g) => (
@@ -371,7 +379,7 @@ export default function ProfilePage() {
                 className={`btn-ghost w-full !justify-between !text-left !p-3 transition ${
                   form.goal === g.value
                     ? "!border-emerald-400 !bg-emerald-500/15 text-emerald-300 font-semibold"
-                    : "hover:border-white/20"
+                    : "hover:border-line"
                 }`}
                 onClick={() => set("goal", g.value)}
               >
@@ -386,7 +394,7 @@ export default function ProfilePage() {
         </section>
 
         {/* Section 4: Macro Preset */}
-        <section className="card space-y-4 border-white/10 bg-surface-raised/80">
+        <section className="card space-y-4 border-line bg-surface-raised/80">
           <SectionTitle>Macro Split Preset</SectionTitle>
           <div className="grid grid-cols-3 gap-2">
             {(["standard", "high_protein", "low_carb"] as const).map((p) => (

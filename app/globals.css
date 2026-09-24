@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Light theme: celestial starlit sky & high-contrast glass */
+/* Light theme: crisp celestial daytime sky & high-contrast glass */
 :root {
   color-scheme: light;
   --bg: 248 250 252;
@@ -21,14 +21,14 @@
 /* Dark theme: deep space galaxy with glowing celestial accents */
 .dark {
   color-scheme: dark;
-  --bg: 7 11 22;
+  --bg: 6 10 22;
   --bg-raised: 15 23 42;
-  --bg-overlay: 24 35 56;
-  --line: 34 48 74;
-  --ink: 241 245 249;
+  --bg-overlay: 30 41 59;
+  --line: 51 65 85;
+  --ink: 248 250 252;
   --muted: 148 163 184;
   --accent: 16 185 129;
-  --accent-contrast: 7 11 22;
+  --accent-contrast: 6 10 22;
   --good: 52 211 153;
   --warn: 251 191 36;
   --bad: 248 113 113;
@@ -36,11 +36,12 @@
 
 html {
   background: rgb(var(--bg));
+  color: rgb(var(--ink));
   scroll-behavior: smooth;
 }
 
 .dark html {
-  background: #070b16;
+  background: #060a16;
 }
 
 body {
@@ -70,7 +71,7 @@ input[type="number"] {
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-line/60 bg-surface-raised/80 backdrop-blur-xl p-5 shadow-lg shadow-black/5 dark:shadow-black/30 transition-all hover:border-line;
+    @apply rounded-2xl border border-line bg-surface-raised/85 backdrop-blur-xl p-5 shadow-lg shadow-slate-200/50 dark:shadow-black/40 text-ink transition-all hover:border-line;
   }
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition active:scale-[0.98] disabled:opacity-40;
@@ -79,18 +80,18 @@ input[type="number"] {
     @apply btn bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20 hover:from-emerald-400 hover:to-teal-400 hover:shadow-emerald-500/35 hover:scale-[1.01];
   }
   .btn-ghost {
-    @apply btn border border-line/70 bg-surface/60 backdrop-blur-md text-ink hover:bg-surface-overlay hover:border-ink/40;
+    @apply btn border border-line bg-surface/80 backdrop-blur-md text-ink hover:bg-surface-overlay hover:border-ink/40;
   }
   .btn-danger {
     @apply btn border border-bad/40 bg-bad/10 text-bad hover:bg-bad/20;
   }
   .input {
-    @apply w-full rounded-xl border border-line/80 bg-surface/75 backdrop-blur-md px-3.5 py-2.5 text-sm text-ink placeholder-muted outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20;
+    @apply w-full rounded-xl border border-line bg-surface/90 backdrop-blur-md px-3.5 py-2.5 text-sm text-ink placeholder-muted outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20;
   }
   .label {
     @apply mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-muted;
   }
   .chip {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-line/70 bg-surface/75 backdrop-blur-md px-3 py-1 text-xs text-ink transition hover:border-ink/40;
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-surface/85 backdrop-blur-md px-3 py-1 text-xs text-ink transition hover:border-ink/40;
   }
 }
